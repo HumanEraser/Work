@@ -5,16 +5,18 @@
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/login.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory</title>
 </head>
 <body data-bs-theme="dark">
     <div class="loginMenu text-center align-items-center justify-content-center">
         <form class="form2 align-items-center justify-content-center">
-            <label for="username">Username:</label><br>
-            <input id="username" type="text"><br>
-            <label for="password">password</label><br>
-            <input id="password" type="password">
+            <label class="labels mb-1" for="username">Username</label><br>
+            <input id="username" class="mb-4" type="text"><br>
+            <label class="labels mb-1" for="password" class="">Password</label><br>
+            <input id="password" type="password"><br>
+            <button class="btnLogin btn btn-primary mt-4" onclick="checkLogin()" href="">Login</button>
         </form>
     </div>
 </body>

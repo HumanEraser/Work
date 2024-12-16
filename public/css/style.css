@@ -3,8 +3,25 @@
     box-sizing: border-box;
 }
 
+.loginMenu{
+    width: 100%;
+}
+
 .form2{
     display: block;
     margin-left: auto;
-    margin-right: auto
+    margin-right: auto;
+    margin-top: 15%;
+}
+
+.form2 input{
+    width: 15%;
+}
+
+.labels{
+    font-size: 120%;
+}
+
+.btnLogin{
+    font-size: 150%;
 }
