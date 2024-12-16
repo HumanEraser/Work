@@ -14,6 +14,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(express.static('public', {
+    strict: false
+}));
 app.use(ret());
 
 
