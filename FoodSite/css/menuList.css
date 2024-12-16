@@ -1,0 +1,75 @@
+.menuListLayout{
+    width: 90%;
+}
+
+.topLogo{
+    width: 100%;
+}
+
+.topLogo img{
+    width: 10%;
+    height: 10%;
+}
+
+.foodList{
+    width: 100%;
+    background-color: darksalmon;
+    padding: 1%;
+}
+
+.btnFood{
+    width: 20%;
+    margin-bottom: 10px;
+    margin-right: 5px;
+}
+
+.foodList img{
+    width: 50%;
+}
+
+.foodOrder input{
+width: 5%;
+}
+
+.foodOrder img{
+    width: 25%;
+}
+
+.modalCase{
+    background-color: #ba653e;
+    color:white;
+    font-weight: 600;
+}
+
+.amBtn{
+    padding:0%;
+    padding-top: 0.1%;
+    padding-bottom: 0.1%;
+    width: 10%;
+    font-size: 150%;
+}
+
+.inputOrder{
+    width: 100%;
+    background-color: #a65b38;
+    color:white;
+    text-align: center;
+    font-size: 115%;
+    padding: 0;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+
+
+.foodModal{
+    
+}

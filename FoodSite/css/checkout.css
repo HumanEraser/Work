@@ -1,0 +1,24 @@
+.checkOutList{
+    width: 90%;
+    background-color: rgb(249, 171, 229) ;
+    color: white;
+    border-radius: 13px;
+}
+
+.checkOutList table,.checkOutList tr,.checkOutList th,.checkOutList td{
+    background-color: rgb(249, 171, 229) ;
+    color: white;
+    border-radius: 13px;
+}
+
+.checkOutList button{
+    float: right;
+    margin-top: 1%;
+    background-color: rgb(198, 58, 58);
+    border-color: transparent;
+}
+
+.checkOutList button:hover{
+    background-color: rgb(177, 52, 52);
+    border-color: transparent;
+}

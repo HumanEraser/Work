@@ -1,0 +1,30 @@
+[{
+    "merchantName": "Bhan Mi Kitchen",
+    "foodItems": [{
+        "itemName": "The Classic",
+        "itemDesc": "prok",
+        "variation": ["Junior", "Full"],
+        "price": "200.00"
+    },{
+        "itemName": "Lemongrass",
+        "itemDesc": "prok",
+        "variation": ["Junior", "Full"],
+        "price": "270.00"
+    }]
+    
+},
+
+{
+    "merchantName": "Sisig",
+    "foodItems": [{
+        "itemName": "Sisig Rice",
+        "itemDesc": "prok",
+        "variation": ["none"],
+        "price": "200.00"
+    }]
+}]
+
+{
+    "data1": "a",
+    "data2": "b"
+}
