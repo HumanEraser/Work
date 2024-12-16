@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import http from 'http';
+import session from 'express-session';
 import {
     ret
 } from './routes.js';
@@ -13,6 +14,17 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
+}));
+app.use(session({
+    secret: 'mySecret',
+    cookie: {
+        maxAge: 18000000
+    },
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        sameSite: 'strict'
+    }
 }));
 app.use(express.static('public', {
     strict: false
