@@ -2,22 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="/css/style.css" />
-    <script src="/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/login.js"></script>
+    <link rel="stylesheet" type="text/css" href="../public/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="../public/css/style.css" />
+    <script src="../public/js/bootstrap.bundle.min.js"></script>
+    <script src="../public/js/login.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory</title>
 </head>
 <body data-bs-theme="dark">
     <div class="loginMenu text-center align-items-center justify-content-center">
-        <form class="form2 align-items-center justify-content-center">
             <label class="labels mb-1" for="username">Username</label><br>
             <input id="username" class="mb-4" type="text"><br>
             <label class="labels mb-1" for="password" class="">Password</label><br>
             <input id="password" type="password"><br>
             <button class="btnLogin btn btn-primary mt-4" onclick="checkLogin()">Login</button>
-        </form>
     </div>
 </body>
 </html>
