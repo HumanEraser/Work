@@ -1,15 +1,18 @@
-function goSales(){
+
+
+
+function goSales() {
     window.location.replace("/sales");
 }
 
-function goRecords(){
+function goRecords() {
     window.location.replace("/admin");
 }
 
-function goInventory(){
+function goInventory() {
     window.location.replace("/inventory");
 }
 
-function goDashboard(){
+function goDashboard() {
     window.location.replace("/admin");
 }

@@ -1,8 +1,8 @@
-function showAddModal(){
+function showAddModal() {
     $('#addModal').modal('show');
 }
 
-function cancelAdd(){
+function cancelAdd() {
     $('#addModal').modal('hide');
     document.getElementById('inTime').value = '';
     document.getElementById('inProduct').value = '';
@@ -15,7 +15,7 @@ function cancelAdd(){
     document.getElementById('inSF').value = '';
 }
 
-function saveAdd(){
+function saveAdd() {
     var inTime = document.getElementById('inTime').value;
     var inProduct = document.getElementById('inProduct').value;
     var inVariant = document.getElementById('inVariant').value;
@@ -35,24 +35,70 @@ function saveAdd(){
     console.log(inPPM);
     console.log(inDiscount);
     console.log(inSF);
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", window.location.origin + "/transaction");
+    xhr.setRequestHeader("Accept", "/");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+            console.log(xhr);
+            if (xhr.status == 200) {
+                if (isAdding) {
+                    swal({
+                        title: "Added Successfully",
+                        icon: "success"
+                    });
+                } else {
+                    swal({
+                        title: "Edited Successfully",
+                        icon: "success"
+                    });
+                }
+                $('#addModal').modal('hide');
+                //refreshTable();
+            } else {
+                swal({
+                    title: "Server Error.",
+                    text: "Please try again.",
+                    icon: "error"
+                });
+            }
+        }
+    };
+    data = {
+        details: {
+            itemId: inProduct,
+            quantity: inQuantity,
+            discount: inDiscount,
+            price: inPPI,
+            shippingFee: ""
+        }
+    };
+    console.log(data)
+    batch = JSON.stringify(data);
+    xhr.send(batch);
+
+
+
 }
 
-function refreshTable(){
+function refreshTable() {}
 
+function goSales() {
+    window.location.replace("/sales");
 }
 
-function goSales(){
-    window.location.href = "adminViewSales.html";
+function goRecords() {
+    window.location.replace("/admin");
 }
 
-function goRecords(){
-    window.location.href = "adminView.html";
+function goInventory() {
+    window.location.replace("/inventory");
 }
 
-function goInventory(){
-    window.location.href = "adminView.html";
-}
-
-function goDashboard(){
-    window.location.href = "adminView.html";
+function goDashboard() {
+    window.location.replace("/admin");
 }

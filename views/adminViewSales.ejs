@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../public/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="../public/css/adminView.css" />
+    <script src="../public/js/bootstrap.bundle.min.js"></script>
+    <script src="../public/js/adminViewSales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <title>Administrator</title>
+</head>
+
+<body data-bs-theme="light">
+    <div class="dashBoard text-center align-items-center justify-content-center">
+        <button class="btn" onclick="goSales()">Sales History</button>
+        <button class="btn" onclick="goRecords()">Delivery Transactions</button>
+        <button class="btn" onclick="goInventory()">Product Inventory</button>
+        <button class="btn" onclick="goDashboard()">Dashboard</button>
+        <h1>SALES</h1>
+        <button class="btn" onclick="showAddModal()">ADD SALES</button>
+        <div class="tableCont text-center align-items-center justify-content-center">
+            <!--TRANSACTIONS-->
+            <table class="table text-center align-items-center justify-content-center">
+
+                <tr>
+                    <th>Time</th>
+                    <th>Product</th>
+                    <th>Variant</th>
+                    <th>Quantity</th>
+                    <th>Price per Item</th>
+                    <th>Total Price</th>
+                    <th>Price / Measurement</th>
+                    <th>Discount</th>
+                    <th>Shipping Fee</th>
+                    <th>OPTIONS</th>
+                </tr>
+                <tr>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td>1,000,000</td>
+                    <td><button class="btn">EDIT</button></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="addModal" class="modal fade align-items-center justify-content-center" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div class="row align-items-center justify-content-center w-100">
+                <h2 class="modal-title text-center">ADD SALES</h2>
+              </div>
+            </div>
+            <div class="modal-body text-center align-items-center justify-content-center">
+              <label for="inTime">TIME</label>
+              <input type="text" placeholder="12:00" id="inTime" name="inTime">
+                <br>
+              <label for="inProduct">Product</label>
+              <input type="text" id="inProduct">
+              <br>
+              <label for="inVariant">Variant &#40;if applicable&#41;</label>
+              <select name="inVariant" id="inVariant">
+                <option value="noVariant" selected>No Variant</option>
+                <option value="variant1">variant 1</option>
+                <option value="variant2">variant 2</option>
+                <option value="variant3">variant 3</option>
+              </select>
+              <br>
+              <label for="inQuantity">Quantity</label>
+              <input type="text" id="inQuantity">
+              <br>
+              <label for="inPPI">Price Per Item</label>
+              <input type="text" id="inPPI">
+              <br>
+              <label for="inTP">Total Price</label>
+              <input type="text" id="inTP">
+              <br>
+              <label for="inPPM">Price per Meassurement &#40;if applicable&#41;</label>
+              <input type="text" id="inPPM">
+              <br>
+              <br>
+              <label for="inDiscount">Discount &#40;if applicable&#41;</label>
+              <input type="text" id="inDiscount">
+              <br>
+              <label for="inSF">Shipping Fee &#40;if applicable&#41;</label>
+              <input type="text" id="inSF">
+            <div class="modal-footer align-items-center justify-content-center">
+              <button class="btn btn-primary" onclick="cancelAdd()">Cancel</button>
+              <button class="btn btn-primary" onclick="saveAdd()">Save Sale</button>
+            </div>
+    
+          </div>
+        </div>
+    </div>
+</body>
+
+</html>
