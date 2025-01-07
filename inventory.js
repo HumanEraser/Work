@@ -166,7 +166,7 @@ router.get('/transactionList', async function (req, res) {
 });
 
 router.post('/transaction', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Assistant") {
             var db = await connect("root", "db_aemetal");
             try {
@@ -191,7 +191,7 @@ router.post('/transaction', async function (req, res) {
 });
 
 router.put('/transaction', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Assistant") {
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
@@ -216,7 +216,7 @@ router.put('/transaction', async function (req, res) {
 });
 
 router.delete('/transaction', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access != "Administrator") {
             res.status(500).send();
         } else {
@@ -315,7 +315,7 @@ router.post('/inventory', async function (req, res) {
 });
 
 router.put('/inventory', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access != "Administrator") {
             res.status(500).send();
         } else {
@@ -340,7 +340,7 @@ router.put('/inventory', async function (req, res) {
 });
 
 router.delete('/inventory', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access != "Administrator") {
             res.status(500).send();
         } else {
@@ -453,7 +453,7 @@ router.get('/deliveryList', async function (req, res) {
 
 
 router.post('/delivery', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Assistant") {
             var db = await connect("root", "db_aemetal");
             try {
@@ -478,7 +478,7 @@ router.post('/delivery', async function (req, res) {
 });
 
 router.put('/delivery', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Assistant") {
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
@@ -503,7 +503,7 @@ router.put('/delivery', async function (req, res) {
 });
 
 router.delete('/delivery', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access != "Administrator") {
             res.status(500).send();
         } else {
