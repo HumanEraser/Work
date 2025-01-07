@@ -5,6 +5,23 @@ import {
 
 var router = express.Router();
 
+function isThisWeek (date) {
+    const now = new Date();
+  
+    const weekDay = (now.getDay() + 6) % 7; // Make sure Sunday is 6, not 0
+    const monthDay = now.getDate();
+    const mondayThisWeek = monthDay - weekDay;
+  
+    const startOfThisWeek = new Date(+now);
+    startOfThisWeek.setDate(mondayThisWeek);
+    startOfThisWeek.setHours(0, 0, 0, 0);
+  
+    const startOfNextWeek = new Date(+startOfThisWeek);
+    startOfNextWeek.setDate(mondayThisWeek + 7);
+  
+    return date >= startOfThisWeek && date < startOfNextWeek;
+  }
+
 router.get('/', async function (req, res) {
     res.render('index.ejs');
 });
@@ -46,14 +63,18 @@ router.get('/stats', async function (req, res) {
                 var weekSales = 0;
                 var yearSales = 0;
                 for(var i=0;i<results.length;++i){
-                    var inputDate = new Date(results[i].transactionDate);
+                    var inputDate = new Date(results[i].transactionDate.split("T")[0]);
                     var todaysDate = new Date();
                     var thisSale = (parseInt(results[i].transactionPrice) * parseInt(results[i].transactionQuantity));
                     if(inputDate.setHours(0,0,0,0) == todaysDate.setHours(0,0,0,0)) {
-                        daySales += (parseInt(results[i].transactionPrice) * parseInt(results[i].transactionQuantity));
-
-                    }else{
-
+                        daySales += thisSale;
+                        weekSales += thisSale;
+                        yearSales += thisSale;
+                    }else if (isThisWeek(inputDate)){
+                        weekSales += thisSale;
+                        yearSales += thisSale;
+                    }else if(inputDate.getFullYear() == todaysDate.getFullYear()){
+                        yearSales += thisSale;
                     }
                 }
                 db.end();
