@@ -400,6 +400,133 @@ router.get('/sales', async function (req, res) {
     }
 });
 
+router.get('/deliveryList', async function (req, res) {
+    if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Secretary" || req.session.access == "Assistant") {
+            var db = await connect("root", "db_aemetal");
+            try {
+                var lowEnd = ((req.query.page - 1) * 10) + 1;
+                var highEnd = req.query.page * 10;
+                if (typeof req.query.searchTarget != "undefined" || typeof req.query.searchQuery != "undefined") {
+                    var doContinue = true;
+                    var sql = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY deliveryId asc ) AS RowNum FROM tb_delivery where ( {{target}} LIKE ? OR {{target}} LIKE ? OR {{target}} LIKE ? ) ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum";
+                    if (req.query.searchTarget == "item") {
+                        sql = sql.replaceAll("{{target}}", "delivaryItem");
+                    } else if (req.query.searchTarget == "status") {
+                        sql = sql.replaceAll("{{target}}", "delivaryStatus");
+                    } else if (req.query.searchTarget == "notes") {
+                        sql = sql.replaceAll("{{target}}", "delivaryNotes");
+                    } else {
+                        doContinue = false;
+                    }
+                    if (doContinue) {
+                        var [results, fields] = await db.query(
+                            sql,
+                            ['%' + req.query.searchQuery, req.query.searchQuery + '%', '%' + req.query.searchQuery + '%', lowEnd, highEnd]
+                        );
+                        db.end();
+                        res.status(200).send(results);
+                    } else {
+                        db.end();
+                        res.status(404).send();
+                    }
+                } else {
+                    var [results, fields] = await db.query(
+                        "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY deliveryId asc ) AS RowNum FROM tb_delivery ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
+                        [lowEnd, highEnd]
+                    );
+                    db.end();
+                    res.status(200).send(results);
+                }
+            } catch (err) {
+                console.log(err);
+                db.end();
+                res.status(404).send();
+            }
+        } else {
+            res.status(404).send();
+        }
+    } else {
+        res.status(404).send();
+    }
+});
+
+
+router.post('/delivery', async function (req, res) {
+    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Assistant") {
+            var db = await connect("root", "db_aemetal");
+            try {
+                var details = req.body.details;
+                await db.query(
+                    "INSERT INTO tb_delivery (deliveryItem, deliveryStatus, deliveryNotes) VALUES(?,?,?)",
+                    [details.item, details.status, details.notes]
+                );
+                db.end();
+                res.status(200).send();
+            } catch (err) {
+                db.end();
+                console.log(err);
+                res.status(500).send();
+            }
+        } else {
+            res.status(500).send();
+        }
+    } else {
+        res.status(500).send();
+    }
+});
+
+router.put('/delivery', async function (req, res) {
+    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Assistant") {
+            var db = await connect("root", "db_aemetal");
+            var details = req.body.details;
+            try {
+                await db.query(
+                    "UPDATE tb_delivery SET deliveryItem = ?, deliveryStatus = ?, deliveryNotes = ? WHERE deliveryId = ?",
+                    [details.item, details.status, details.notes, details.id]
+                );
+                db.end();
+                res.status(200).send();
+            } catch (err) {
+                db.end();
+                console.log(err);
+                res.status(500).send();
+            }
+        } else {
+            res.status(500).send();
+        }
+    } else {
+        res.status(500).send();
+    }
+});
+
+router.delete('/delivery', async function (req, res) {
+    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+        if (req.session.access != "Administrator") {
+            res.status(500).send();
+        } else {
+            var db = await connect("root", "db_aemetal");
+            var details = req.body.details;
+            try {
+                await db.query(
+                    "DELETE FROM tb_delivery WHERE deliveryId = ?",
+                    [details.id]
+                );
+                db.end();
+                res.status(200).send();
+            } catch (err) {
+                db.end();
+                console.log(err);
+                res.status(500).send();
+            }
+        }
+    } else {
+        res.status(500).send();
+    }
+});
+
 export function inventory() {
     return router;
 };
