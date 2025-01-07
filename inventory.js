@@ -249,7 +249,7 @@ router.get('/inventoryList', async function (req, res) {
                 var highEnd = req.query.page * 10;
                 if (typeof req.query.searchTarget != "undefined" || typeof req.query.searchQuery != "undefined") {
                     var doContinue = true;
-                    var sql = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY transactionDate desc ) AS RowNum FROM tb_inventory WHERE ({{target}} LIKE ? or {{target}} LIKE ? or {{target}} LIKE ?) ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum";
+                    var sql = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY inventoryId asc ) AS RowNum FROM tb_inventory WHERE ({{target}} LIKE ? or {{target}} LIKE ? or {{target}} LIKE ?) ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum";
                     if (req.query.searchTarget == "brand") {
                         sql = sql.replaceAll("{{target}}", "inventoryBrand");
                     } else if (req.query.searchTarget == "category") {
