@@ -270,7 +270,7 @@ router.get('/inventoryList', async function (req, res) {
                     }
                 } else {
                     var [results, fields] = await db.query(
-                        "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY transactionDate desc ) AS RowNum FROM tb_inventory ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
+                        "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY inventoryId asc ) AS RowNum FROM tb_inventory ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
                         [lowEnd, highEnd]
                     );
                     db.end();
