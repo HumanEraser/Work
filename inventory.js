@@ -290,7 +290,7 @@ router.get('/inventoryList', async function (req, res) {
 });
 
 router.post('/inventory', async function (req, res) {
-    if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access != "Administrator") {
             res.status(500).send();
         } else {
