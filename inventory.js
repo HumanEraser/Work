@@ -83,9 +83,7 @@ router.get('/transactionList', async function(req,res){
 
 router.post('/transaction', async function(req, res){
     if(typeof req.session.access == "undefined" && typeof req.body.details != "undefined"){
-        if(req.session.access != "Administrator"){
-            res.status(500).send();
-        }else{
+        if(req.session.access == "Administrator" || req.session.access == "Assistant"){
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
             try{
@@ -100,6 +98,8 @@ router.post('/transaction', async function(req, res){
                 console.log(err);
                 res.status(500).send();
             }
+        }else{
+            res.status(500).send();
         }
     }else{
         res.status(500).send();
@@ -108,9 +108,7 @@ router.post('/transaction', async function(req, res){
 
 router.put('/transaction', async function(req, res){
     if(typeof req.session.access == "undefined" && typeof req.body.details != "undefined"){
-        if(req.session.access != "Administrator"){
-            res.status(500).send();
-        }else{
+        if(req.session.access == "Administrator" || req.session.access == "Assistant"){
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
             try{
@@ -125,6 +123,8 @@ router.put('/transaction', async function(req, res){
                 console.log(err);
                 res.status(500).send();
             }
+        }else{
+            res.status(500).send();
         }
     }else{
         res.status(500).send();
