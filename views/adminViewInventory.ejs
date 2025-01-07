@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="../public/css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="../public/css/adminView.css" />
     <script src="../public/js/bootstrap.bundle.min.js"></script>
-    <script src="../public/js/adminViewSales.js"></script>
+    <script src="../public/js/adminViewInventory.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
@@ -19,7 +19,7 @@
         <button class="btn" onclick="goRecords()">Delivery Transactions</button>
         <button class="btn" onclick="goInventory()">Product Inventory</button>
         <button class="btn" onclick="goDashboard()">Dashboard</button>
-        <h1>SALES</h1>
+        <h1>INVENTORY</h1>
         <button class="btn" onclick="showAddModal()">ADD ITEM</button>
         <div class="tableCont text-center align-items-center justify-content-center">
             <!--TRANSACTIONS-->
@@ -31,6 +31,7 @@
                     <th>Category</th>
                     <th>Price</th>
                     <th>Unite Of Measurement</th>
+                    <th>Option</th>
                 </tr>
                 <tr>
                     <td>1,000,000</td>
@@ -49,15 +50,12 @@
           <div class="modal-content">
             <div class="modal-header">
               <div class="row align-items-center justify-content-center w-100">
-                <h2 class="modal-title text-center">ADD SALES</h2>
+                <h2 class="modal-title text-center">ADD ITEM</h2>
               </div>
             </div>
             <div class="modal-body text-center align-items-center justify-content-center">
-              <label for="inTime">TIME</label>
-              <input type="text" placeholder="12:00" id="inTime" name="inTime">
-                <br>
-              <label for="inProduct">Product</label>
-              <input type="text" id="inProduct">
+              <label for="inProductId">Product Name:</label>
+              <input type="text" id="inProductId">
               <br>
               <label for="inVariant">Variant &#40;if applicable&#41;</label>
               <select name="inVariant" id="inVariant">
@@ -67,24 +65,15 @@
                 <option value="variant3">variant 3</option>
               </select>
               <br>
-              <label for="inQuantity">Quantity</label>
-              <input type="text" id="inQuantity">
+              <label for="inCategory">Category</label>
+              <input type="text" id="inCategory">
               <br>
               <label for="inPPI">Price Per Item</label>
               <input type="text" id="inPPI">
               <br>
-              <label for="inTP">Total Price</label>
-              <input type="text" id="inTP">
+              <label for="inUM">Unit of Meassurement &#40;if applicable&#41;</label>
+              <input type="text" id="inUM">
               <br>
-              <label for="inPPM">Price per Meassurement &#40;if applicable&#41;</label>
-              <input type="text" id="inPPM">
-              <br>
-              <br>
-              <label for="inDiscount">Discount &#40;if applicable&#41;</label>
-              <input type="text" id="inDiscount">
-              <br>
-              <label for="inSF">Shipping Fee &#40;if applicable&#41;</label>
-              <input type="text" id="inSF">
             <div class="modal-footer align-items-center justify-content-center">
               <button class="btn btn-primary" onclick="cancelAdd()">Cancel</button>
               <button class="btn btn-primary" onclick="saveAdd()">Save Sale</button>

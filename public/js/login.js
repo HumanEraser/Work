@@ -14,7 +14,7 @@ function checkLogin() {
         if (xhr.readyState === 4) {
             if (xhr.status == 200) {
                 window.location.replace("/admin");
-                console.log("asdfadsf");
+                //console.log("asdfadsf");
             } else {
                 Swal.fire({
                     icon: "error",

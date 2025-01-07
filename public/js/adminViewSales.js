@@ -1,18 +1,12 @@
-function showAddModal() {
-    $('#addModal').modal('show');
+function init(){
+
+}
+function refreshTable() {
+
 }
 
-function cancelAdd() {
-    $('#addModal').modal('hide');
-    document.getElementById('inTime').value = '';
-    document.getElementById('inProduct').value = '';
-    document.getElementById('inVariant').value = 'noVariant';
-    document.getElementById('inQuantity').value = '';
-    document.getElementById('inPPI').value = '';
-    document.getElementById('inTP').value = '';
-    document.getElementById('inPPM').value = '';
-    document.getElementById('inDiscount').value = '';
-    document.getElementById('inSF').value = '';
+function showAddModal() {
+    $('#addModal').modal('show');
 }
 
 function saveAdd() {
@@ -46,38 +40,24 @@ function saveAdd() {
             console.log(xhr.responseText);
             console.log(xhr);
             if (xhr.status == 200) {
-                if (isAdding) {
-                    swal({
-                        title: "Added Successfully",
-                        icon: "success"
-                    });
-                } else {
-                    swal({
-                        title: "Edited Successfully",
-                        icon: "success"
-                    });
-                }
                 $('#addModal').modal('hide');
                 //refreshTable();
             } else {
-                swal({
-                    title: "Server Error.",
-                    text: "Please try again.",
-                    icon: "error"
-                });
             }
         }
     };
     data = {
         details: {
-            itemId: inProduct,
-            quantity: inQuantity,
-            discount: inDiscount,
-            price: inPPI,
-            shippingFee: ""
+            itemId: "inProduct",
+            quantity: "inQuantity",
+            price: "inPPI",
+            discount: "inDiscount",
+            shippingFee: "a",
+            status: "a",
+            payment: "a"
         }
     };
-    console.log(data)
+    console.log(data);
     batch = JSON.stringify(data);
     xhr.send(batch);
 
@@ -85,7 +65,18 @@ function saveAdd() {
 
 }
 
-function refreshTable() {}
+function cancelAdd() {
+    $('#addModal').modal('hide');
+    document.getElementById('inTime').value = '';
+    document.getElementById('inProduct').value = '';
+    document.getElementById('inVariant').value = 'noVariant';
+    document.getElementById('inQuantity').value = '';
+    document.getElementById('inPPI').value = '';
+    document.getElementById('inTP').value = '';
+    document.getElementById('inPPM').value = '';
+    document.getElementById('inDiscount').value = '';
+    document.getElementById('inSF').value = '';
+}
 
 function goSales() {
     window.location.replace("/sales");
