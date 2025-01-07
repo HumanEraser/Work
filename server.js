@@ -26,10 +26,20 @@ app.use(session({
         sameSite: 'strict'
     }
 }));
+app.use('/public', express.static('public', {
+    strict: false
+}));
 app.use(express.static('public', {
     strict: false
 }));
 app.use(ret());
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
+
+    next();
+
+});
 
 
 server.listen(port, async function (err) {
