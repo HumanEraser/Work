@@ -40,14 +40,21 @@ router.get('/stats', async function (req, res) {
             var db = await connect("root", "db_aemetal");
             try {
                 var [results, fields] = await db.query(
-                    "SELECT inventoryPrice, transactionQuantity, transactionDate FROM tb_transaction, tb_inventory WHERE transactionItem = inventoryId"
+                    "SELECT transactionPrice, transactionQuantity, transactionDate FROM tb_transaction, tb_inventory WHERE transactionItem = inventoryId"
                 );
                 var daySales = 0;
                 var weekSales = 0;
                 var yearSales = 0;
                 for(var i=0;i<results.length;++i){
-                    var today = new Date();
+                    var inputDate = new Date(results[i].transactionDate);
+                    var todaysDate = new Date();
+                    var thisSale = (parseInt(results[i].transactionPrice) * parseInt(results[i].transactionQuantity));
+                    if(inputDate.setHours(0,0,0,0) == todaysDate.setHours(0,0,0,0)) {
+                        daySales += (parseInt(results[i].transactionPrice) * parseInt(results[i].transactionQuantity));
 
+                    }else{
+
+                    }
                 }
                 db.end();
                 res.status(200).send(results);
@@ -318,6 +325,18 @@ router.get('/admin', async function (req, res) {
             res.redirect("/")
         } else {
             res.render('adminView.ejs');
+        }
+    } else {
+        res.redirect("/");
+    }
+});
+
+router.get('/inventory', async function (req, res) {
+    if (typeof req.session.access != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Secretary") {
+            res.render('adminViewInventory.ejs');
+        } else {
+            res.redirect("/");
         }
     } else {
         res.redirect("/");
