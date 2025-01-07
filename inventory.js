@@ -66,8 +66,8 @@ router.post('/transaction', async function(req, res){
             var details = req.body.details;
             try{
                 await db.query(
-                    "INSERT INTO tb_transaction (transactionItem, transactionQuantity, transactionDiscount, transactionShippingFee) VALUES(?,?,?,?)"
-                    [details.itemId, details.quantity,details.discount,details.shippingFee]
+                    "INSERT INTO tb_transaction (transactionItem, transactionQuantity, transactionDiscount, transactionShippingFee, transactionDelivaryStatus, transactionPaymentMethod) VALUES(?,?,?,?,?,?)"
+                    [details.itemId, details.quantity,details.discount,details.shippingFee,details.status,details.payment]
                 );
                 db.end();
                 res.status(200).send();
@@ -91,8 +91,8 @@ router.put('/transaction', async function(req, res){
             var details = req.body.details;
             try{
                 await db.query(
-                    "UPDATE tb_transaction SET transactionItem = ?, transactionQuantity = ?, transactionDiscount = ?, transactionShippingFee = ? WHERE transactionId = ?"
-                    [details.itemId, details.quantity,details.discount,details.shippingFee, details.id]
+                    "UPDATE tb_transaction SET transactionItem = ?, transactionQuantity = ?, transactionDiscount = ?, transactionShippingFee = ?, transactionDelivaryStatus = ?, transactionPaymentMethod = ? WHERE transactionId = ?"
+                    [details.itemId, details.quantity,details.discount,details.shippingFee, details.status, details.payment, details.id]
                 );
                 db.end();
                 res.status(200).send();
