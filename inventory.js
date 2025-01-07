@@ -34,13 +34,14 @@ router.post('/login', async function (req, res) {
             var [results, fields] = await db.query(
                 "SELECT * FROM tb_userlist WHERE userName = ? AND userPassword = ?", [details.user, details.pass]
             );
+
             if (results.length > 0) {
                 req.session.user = results[0].userName;
                 req.session.pass = results[0].userPass;
                 req.session.access = results[0].userAccess;
             }
-            res.status(200).send();
             db.end();
+            res.status(200).send();
         } catch (err) {
             db.end();
             console.log(err);
@@ -62,7 +63,7 @@ router.get('/stats', async function (req, res) {
                 var daySales = 0;
                 var weekSales = 0;
                 var yearSales = 0;
-                for(var i=0;i<results.length;++i){
+                for (var i=0;i<results.length;++i){
                     var inputDate = new Date(results[i].transactionDate.split("T")[0]);
                     var todaysDate = new Date();
                     var thisSale = (parseInt(results[i].transactionPrice) * parseInt(results[i].transactionQuantity));
@@ -91,6 +92,29 @@ router.get('/stats', async function (req, res) {
         res.status(404).send();
     }
 });
+
+/*
+router.get('/transaction', async function (req, res) {
+    
+    if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Secretary" || req.session.access == "Assistant") {
+            var db = await connect("root", "db_aemetal");
+            try{
+                //CODE
+                db.end();
+                res.status(200).send();
+            }catch(err){
+                console.log(err);
+                db.end()
+                res.status(500).send();
+            }
+        }else{
+            res.status(404).send();
+        }
+    }else{
+        res.status(404).send();
+    }
+})*/
 
 router.get('/transactionList', async function (req, res) {
     if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
@@ -145,8 +169,8 @@ router.post('/transaction', async function (req, res) {
     if (typeof req.session.access == "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Assistant") {
             var db = await connect("root", "db_aemetal");
-            var details = req.body.details;
             try {
+                var details = req.body.details;
                 await db.query(
                     "INSERT INTO tb_transaction (transactionItem, transactionQuantity, transactionPrice, transactionDiscount, transactionShippingFee, transactionDelivaryStatus, transactionPaymentMethod) VALUES(?,?,?,?,?,?)",
                     [details.itemId, details.quantity, details.price, details.discount, details.shippingFee, details.status, details.payment]
@@ -363,7 +387,6 @@ router.get('/inventory', async function (req, res) {
         res.redirect("/");
     }
 });
-
 
 router.get('/sales', async function (req, res) {
     if (typeof req.session.access != "undefined") {
