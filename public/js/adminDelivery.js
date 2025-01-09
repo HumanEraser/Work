@@ -25,47 +25,40 @@ var textListDL;
 var tableListDL;
 var btnImgDL = false;
 var a;
+var deliberd
 
 function init() {
     adminFieldList = [{
-            name: "Item Name",
+            name: "Delivery Number",
             type: "text",
-            ref: "inventoryBrand",
+            ref: "",
             visible: true
 
         },
         {
-            name: "Category",
+            name: "Delivery Status",
             type: "text",
-            ref: "inventoryCategory",
+            ref: "",
             visible: true
         },
         {
-            name: "Price per Piece",
-            type: "text",
-            ref: "inventoryPrice",
-            visible: true
-        },
-        {
-            name: "Unit of Measurement",
-            type: "text",
-            ref: "inventoryUnitOfMeasurement",
-            visible: true
-        },
-        {
-            name: "Category",
-            type: "text",
-            ref: "inventoryCategory",
+            name: "Update Delivery",
+            type: "button",
+            method: "updateDelivery",
+            args: "batchId",
+            other: "#pictureModal",
+            display: "Show",
             visible: true
         }
     ];
+    deliberd = 1;
     refreshTable();
 }
 
 function refreshTable() {
     var page = 1;
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", window.location.origin + "/inventoryList?page=" + encodeURIComponent(page));
+    xhr.open("GET", window.location.origin + "/deliveryList" + encodeURIComponent(page));
     console.log(xhr.responseText);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -227,15 +220,25 @@ function formatTable() {
     }
 }
 
-function saveAdd() {
-    var inProduct = document.getElementById('inProductId').value;
-    var inVariant = document.getElementById('inVariant').value;
-    var inCategory = document.getElementById('inCategory').value;
-    var inPPI = document.getElementById('inPPI').value;
-    var inUM = document.getElementById('inUM').value;
+function updateDelivery(batch){
+    selectedBatch = batch;
+    $('#updateModal').modal('show');
+}
 
+function changeDeliveryStatus(){
+    for(var i=0;document.getElementById('deliv'+i.toString()) != null;++i){
+        if(document.getElementById('deliv'+i.toString()).checked) {
+            deliberd = 0;
+            break;
+        }
+    }
+}
+
+function saveAdd(){
+    var itemDelivered = document.getElementById('itemDelivery').value;
+    var notes = document.getElementById('notes').value;
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", window.location.origin + "/inventory");
+    xhr.open("POST", window.location.origin + "/delivery");
     xhr.setRequestHeader("Accept", "/");
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
@@ -244,7 +247,7 @@ function saveAdd() {
             console.log(xhr.responseText);
             console.log(xhr);
             if (xhr.status == 200) {
-                $('#addModal').modal('hide');
+                $('#updateModal').modal('hide');
                 refreshTable();
             } else {
 
@@ -253,18 +256,13 @@ function saveAdd() {
     };
     data = {
         details: {
-            brand: inProduct,
-            category: inCategory,
-            price: inPPI,
-            unit: inUM
+            item: itemDelivered,
+            status: deliberd,
+            notes: notes
         }
     };
     console.log(data);
     xhr.send(JSON.stringify(data));
-}
-
-function showAddModal() {
-    $('#addModal').modal('show');
 }
 
 function goSales() {
