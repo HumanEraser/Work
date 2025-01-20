@@ -1,3 +1,4 @@
+var data;
 function init(){
 
 }
@@ -20,7 +21,7 @@ function saveAdd() {
     var inDiscount = document.getElementById('inDiscount').value;
     var inSF = document.getElementById('inSF').value;
 
-    console.log(inTime);
+   /*  console.log(inTime);
     console.log(inProduct);
     console.log(inVariant);
     console.log(inQuantity);
@@ -28,8 +29,14 @@ function saveAdd() {
     console.log(inTP);
     console.log(inPPM);
     console.log(inDiscount);
-    console.log(inSF);
-
+    console.log(inSF); */
+    var a = 1;
+    var b = 3;
+    var c = '3';
+    var d = '4';
+    var e = '5';
+    var f = '6';
+    var g = '7';
     let xhr = new XMLHttpRequest();
     xhr.open("POST", window.location.origin + "/transaction");
     xhr.setRequestHeader("Accept", "/");
@@ -43,23 +50,25 @@ function saveAdd() {
                 $('#addModal').modal('hide');
                 //refreshTable();
             } else {
+                console.log(xhr.status);
+            console.log(xhr.responseText);
+            console.log(xhr);
             }
         }
     };
-    data = {
-        details: {
-            itemId: "inProduct",
-            quantity: "inQuantity",
-            price: "inPPI",
-            discount: "inDiscount",
-            shippingFee: "a",
-            status: "a",
-            payment: "a"
+    data ={
+        details:{
+            itemId: a,
+            quantity: b,
+            price: c,
+            discount: d,
+            shippingFee: e,
+            status: f,
+            payment: g
         }
     };
-    console.log(data);
-    batch = JSON.stringify(data);
-    xhr.send(batch);
+    console.log(JSON.stringify(data));
+    xhr.send(JSON.stringify(data));
 
 
 

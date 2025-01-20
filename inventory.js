@@ -172,7 +172,7 @@ router.post('/transaction', async function (req, res) {
             try {
                 var details = req.body.details;
                 await db.query(
-                    "INSERT INTO tb_transaction (transactionItem, transactionQuantity, transactionPrice, transactionDiscount, transactionShippingFee, transactionDelivaryStatus, transactionPaymentMethod) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO tb_transaction (transactionItem, transactionQuantity, transactionPrice, transactionDiscount, transactionShippingFee, transactionDeliveryStatus, transactionPaymentMethod) VALUES(?,?,?,?,?,?,?)",
                     [details.itemId, details.quantity, details.price, details.discount, details.shippingFee, details.status, details.payment]
                 );
                 db.end();

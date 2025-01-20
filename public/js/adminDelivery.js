@@ -27,7 +27,7 @@ var btnImgDL = false;
 var a;
 var deliberd
 
-function init() {
+function init(accountType) {
     adminFieldList = [{
             name: "Delivery Number",
             type: "text",
