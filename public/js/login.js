@@ -13,14 +13,15 @@ function checkLogin() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status == 200) {
-                window.location.replace("/admin");
-                //console.log("asdfadsf");
+                if(xhr.responseText.toString() == "Administrator"){
+                    window.location.replace("/admin");
+                } else if(xhr.responseText.toString() == "Secretary"){
+                    window.location.replace("/secretary");
+                } else if (xhr.responseText.toString() == "Assistant"){
+                    window.location.replace("/Assistant");
+                }
             } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Wrong Username and/or Password",
-                });
+
             }
         }
     };
@@ -30,8 +31,6 @@ function checkLogin() {
             pass: passW
         }
     };
-
-    console.log(data)
     xhr.send(JSON.stringify(data));
 
 

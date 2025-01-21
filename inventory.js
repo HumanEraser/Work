@@ -376,6 +376,18 @@ router.get('/admin', async function (req, res) {
     }
 });
 
+router.get('/secretary', async function (req, res) {
+    if (typeof req.session.access != "undefined") {
+        if (req.session.access != "Secretary") {
+            res.redirect("/")
+        } else {
+            res.render('secretaryView.ejs');
+        }
+    } else {
+        res.redirect("/");
+    }
+});
+
 router.get('/inventory', async function (req, res) {
     if (typeof req.session.access != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Secretary") {
