@@ -258,13 +258,9 @@ function showAddModal() {
 }
 
 function saveAdd() {
-    var inTime = document.getElementById('inTime').value;
     var inProduct = document.getElementById('inProduct').value;
-    var inVariant = document.getElementById('inVariant').value;
     var inQuantity = document.getElementById('inQuantity').value;
-    var inPPI = document.getElementById('inPPI').value;
     var inTP = document.getElementById('inTP').value;
-    var inPPM = document.getElementById('inPPM').value;
     var inDiscount = document.getElementById('inDiscount').value;
     var inSF = document.getElementById('inSF').value;
     console.log(inProduct)

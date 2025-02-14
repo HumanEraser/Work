@@ -11,3 +11,7 @@ label{
 #myBtn{
     background-color: aqua;
 }
+
+#myChart{
+    width: 60%;
+}

@@ -41,7 +41,7 @@ router.post('/login', async function (req, res) {
                 req.session.access = results[0].userAccess;
             }
             db.end();
-            res.status(200).send();
+            res.status(200).send(req.session.access);
         } catch (err) {
             db.end();
             console.log(err);
