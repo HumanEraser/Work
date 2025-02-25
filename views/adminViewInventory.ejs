@@ -13,22 +13,22 @@
 </head>
 
 <body data-bs-theme="light" onload="init()">
-  <div class="text-center col m-1 mt-4 mb-4">
-    <div class="text-center justify-content-center align-items-center row m-1">
-      <span class="col-2" name="toDark">Search</span><input id="searchText" onchange="formatTable()"
-        class="bg-white text-dark col form-control">
-      <div class="col-2">
-        <select id="searchField" class="col-2 form-select" name="toDark">
-          <option> Test</option>
-        </select>
-      </div>
-    </div>
-  </div>
     <div class="dashBoard text-center align-items-center justify-content-center">
         <button class="btn" onclick="goSales()">Sales History</button>
         <button class="btn" onclick="goRecords()">Delivery Transactions</button>
         <button class="btn" onclick="goInventory()">Product Inventory</button>
         <button class="btn" onclick="goDashboard()">Dashboard</button>
+        <div class="text-center col m-1 mt-4 mb-4">
+          <div class="text-center justify-content-center align-items-center row m-1">
+            <span class="col-2" name="toDark">Search</span><input id="searchText" onchange="formatTable()"
+              class="bg-white text-dark col form-control">
+            <div class="col-2">
+              <select id="searchField" class="col-2 form-select" name="toDark">
+                <option> Test</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <h1>INVENTORY</h1>
         <button class="btn" onclick="showAddModal()">ADD ITEM</button>
         <div class="tableCont text-center align-items-center justify-content-center">

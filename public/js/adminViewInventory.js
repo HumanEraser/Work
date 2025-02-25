@@ -57,7 +57,16 @@ function init() {
             type: "text",
             ref: "inventoryCategory",
             visible: true
-        }
+        },
+        {
+            name: "Edit Item",
+            type: "button",
+            method: "editModal",
+            args: "batchId",
+            other: "#editModal",
+            display: "Edit",
+            visible: true
+        },
     ];
     refreshTable();
 }
