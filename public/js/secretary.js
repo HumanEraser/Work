@@ -130,6 +130,7 @@ function saveAdd() {
     } else {
         var details = {
             itemId: batchData[selectedBatch].inventoryId,
+            itemName: batchData[selectedBatch].inventoryBrand,
             quantity: quantity,
             type: type,
             price: price

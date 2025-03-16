@@ -673,6 +673,7 @@ router.post('/saveOrder', async function (req, res) {
             var [results, fields] = await db.query(itemSQL, [details.itemId]);
             if (results.length > 0) {
                 order.item = results[0];
+                order.itemName = details.itemName;
                 order.quantity = details.quantity;
                 order.type = details.type;
                 order.price = details.price;
