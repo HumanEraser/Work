@@ -1,10 +1,17 @@
 import express from 'express';
-import {
-    connect
-} from './sql.js';
+import { connect } from './sql.js';
+import Cache from 'node-cache';
+import { myCacheList } from './myCache.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Define __filename and __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 var router = express.Router();
-
+const myCache = new Cache();
 function isThisWeek (date) {
     const now = new Date();
   
@@ -115,7 +122,7 @@ router.get('/transaction', async function (req, res) {
         res.status(404).send();
     }
 })*/
-
+// TRANSACTION //
 router.get('/transactionList', async function (req, res) {
     if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Secretary" || req.session.access == "Assistant") {
@@ -158,6 +165,49 @@ router.get('/transactionList', async function (req, res) {
                 res.status(404).send();
             }
         } else {
+            res.status(404).send();
+        }
+    } else {
+        res.status(404).send();
+    }
+});
+
+router.get('/transactionListG', async function (req, res) {
+    if (typeof req.session.access != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Secretary" || req.session.access == "Assistant") {
+            var db = await connect("root", "db_aemetal");
+            try {
+                var [results, fields] = await db.query(
+                    "SELECT * FROM tb_batchlist,tb_transaction,tb_inventory where batchId = transactionBatch and inventoryId = transactionItem group by batchId order by transactionId asc",
+                );
+                db.end();
+                res.status(200).send(results);
+            } catch (err) {
+                db.end();
+                console.log(err);
+                res.status(404).send();
+            }
+        } else {
+            res.status(404).send();
+        }
+    } else {
+        res.status(404).send();
+    }
+});
+
+router.get('/transactionBatch', async function (req, res) {
+    if (typeof req.query.batch != "undefined") {
+        var db = await connect("root", "db_aemetal");
+        try {
+            var [results, fields] = await db.query(
+                "SELECT * FROM tb_batchlist, tb_transaction, tb_inventory WHERE batchId = transactionBatch AND inventoryId = transactionItem AND batchId = ? ORDER BY transactionId ASC",
+                [req.query.batch]
+            );
+            db.end();
+            res.status(200).send(results);
+        } catch (err) {
+            db.end();
+            console.log(err);
             res.status(404).send();
         }
     } else {
@@ -240,6 +290,7 @@ router.delete('/transaction', async function (req, res) {
     }
 });
 
+// INVENTORY //
 router.get('/inventoryList', async function (req, res) {
     if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Secretary") {
@@ -298,8 +349,8 @@ router.post('/inventory', async function (req, res) {
             var details = req.body.details;
             try {
                 await db.query(
-                    "INSERT INTO tb_inventory (inventoryBrand, inventoryCategory, inventoryPrice, inventoryUnitOfMeasurement) VALUES(?,?,?,?)",
-                    [details.brand, details.category, details.price, details.unit]
+                    "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice202, inventoryPrice304, inventoryQuantity202, inventoryQuantity304) VALUES(?,?,?,?,?)",
+                    [details.brand, details.price202, details.price304, details.quantity202, details.quantity304]
                 );
                 db.end();
                 res.status(200).send();
@@ -314,6 +365,38 @@ router.post('/inventory', async function (req, res) {
     }
 });
 
+router.get('/inventory/:id', async function (req, res) {
+    if (typeof req.session.access != "undefined") {
+        if (req.session.access == "Administrator" || req.session.access == "Secretary") {
+            var db = await connect("root", "db_aemetal");
+            try {
+                const inventoryId = req.params.id;
+                
+                var [results, fields] = await db.query(
+                    "SELECT * FROM tb_inventory WHERE inventoryId = ?",
+                    [inventoryId]
+                );
+                
+                db.end();
+                
+                if (results.length > 0) {
+                    res.status(200).send(results[0]);
+                } else {
+                    res.status(404).send({ message: "Inventory item not found" });
+                }
+            } catch (err) {
+                console.log(err);
+                db.end();
+                res.status(404).send({ error: "Database error" });
+            }
+        } else {
+            res.status(403).send({ message: "Unauthorized access" });
+        }
+    } else {
+        res.status(401).send({ message: "Not authenticated" });
+    }
+});
+
 router.put('/inventory', async function (req, res) {
     if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
         if (req.session.access != "Administrator") {
@@ -323,8 +406,8 @@ router.put('/inventory', async function (req, res) {
             var details = req.body.details;
             try {
                 await db.query(
-                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryCategory = ?, inventoryPrice = ?, inventoryUnitOfMeasurement = ? WHERE inventoryId = ?",
-                    [details.brand, details.category, details.price, details.unit, details.id]
+                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice202 = ?, inventoryPrice304 = ?, inventoryQuantity202 = ?, inventoryQuantity304 = ? WHERE inventoryId = ?",
+                    [details.brand, details.price202, details.price304, details.quantity202, details.quantity304, details.id]
                 );
                 db.end();
                 res.status(200).send();
@@ -364,6 +447,7 @@ router.delete('/inventory', async function (req, res) {
     }
 });
 
+// TO SITE //
 router.get('/admin', async function (req, res) {
     if (typeof req.session.access != "undefined") {
         if (req.session.access != "Administrator") {
@@ -379,9 +463,33 @@ router.get('/admin', async function (req, res) {
 router.get('/secretary', async function (req, res) {
     if (typeof req.session.access != "undefined") {
         if (req.session.access != "Secretary") {
-            res.redirect("/")
+            res.redirect("/");
         } else {
-            res.render('secretaryView.ejs');
+            try {
+                var cachedData = await myCacheList();
+                var theData = (cachedData.get("biteClubData")).storeData;
+                var detected = false;
+                for (var i = 0; i < theData.items.length; ++i) {
+                    if (theData.items[i].merchantName == req.query.store) {
+                        detected = true;
+                        if (typeof req.session.orders == "undefined") req.session.orders = [];
+                        var trueData = {
+                            webData: req.session.orders
+                            
+                        };
+                        if (typeof req.session.orders != "undefined") trueData.cartCount = req.session.orders.length;
+                        else trueData.cartCount = 0;
+                        res.render(path.join(__dirname, 'views/secretaryView.ejs'), trueData);
+                        break;
+                    }
+                }
+                if (!detected) {
+                    res.status(404).send({ message: "Store not found" });
+                }
+            } catch (err) {
+                console.log(err);
+                res.status(500).send({ error: "Internal Server Error" });
+            }
         }
     } else {
         res.redirect("/");
@@ -412,6 +520,19 @@ router.get('/sales', async function (req, res) {
     }
 });
 
+router.get('/salesAdd', async function (req, res) {
+    if (typeof req.session.access != "undefined") {
+        if (req.session.access != "Administrator") {
+            res.redirect("/")
+        } else {
+            res.render('adminAddSales.ejs');
+        }
+    } else {
+        res.redirect("/");
+    }
+});
+
+// DELIVERY //
 router.get('/deliveryList', async function (req, res) {
     if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Secretary" || req.session.access == "Assistant") {
@@ -462,7 +583,6 @@ router.get('/deliveryList', async function (req, res) {
         res.status(404).send();
     }
 });
-
 
 router.post('/delivery', async function (req, res) {
     if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
@@ -537,6 +657,65 @@ router.delete('/delivery', async function (req, res) {
     } else {
         res.status(500).send();
     }
+});
+
+// OTHERS //
+router.post('/saveOrder', async function (req, res) {
+    console.log("Received request to save order");
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined") {
+        var db = await connect("root", "db_aemetal");
+        try {
+            var details = req.body.details;
+            console.log("Order details:", details);
+            if (typeof req.session.orders == "undefined") req.session.orders = [];
+            var order = {};
+            var itemSQL = "SELECT * FROM tb_inventory WHERE inventoryId = ?";
+            var [results, fields] = await db.query(itemSQL, [details.itemId]);
+            if (results.length > 0) {
+                order.item = results[0];
+                order.quantity = details.quantity;
+                order.type = details.type;
+                order.price = details.price;
+                req.session.orders.push(order);
+                res.status(200).send();
+            } else {
+                res.status(404).send();
+            }
+            db.end();
+        } catch (err) {
+            db.end();
+            console.log("Error:", err);
+            res.status(500).send();
+        }
+    } else {
+        console.log("Invalid session or request body");
+        res.status(500).send();
+    }
+});
+
+router.post('/delete', async function (req, res) {
+    if (typeof req.body.details != "undefined" && typeof req.session.orders != "undefined") {
+        try {
+            var dIndex = req.body.details.index;
+
+            var orders = req.session.orders.filter(function (item, index, arr) {
+                if (index == dIndex) return false;
+                else return true;
+            });
+            req.session.orders = orders;
+            res.status(200).send();
+        } catch (err) {
+            console.log(err);
+            res.status(500).send();
+        }
+    } else {
+        res.status(500).send();
+    }
+});
+
+router.post('/logout', async function (req, res) {
+    req.session.destroy();
+    res.redirect("/");
 });
 
 export function inventory() {

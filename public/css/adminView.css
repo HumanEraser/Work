@@ -15,3 +15,18 @@ label{
 #myChart{
     width: 60%;
 }
+
+.addMudal{
+    font-size: 1rem;
+    display: grid;
+    grid-template-columns: 40% 60%;
+    grid-gap: 5%;
+}
+
+#editModal{
+
+}
+
+.editMudal{
+
+}

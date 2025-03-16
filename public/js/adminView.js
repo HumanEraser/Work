@@ -36,7 +36,7 @@ function getSalesData() {
             }
         }
     };
-    xhr.send();
+    xhr.send(); 
 }
 
 function formatDate() {

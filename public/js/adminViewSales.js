@@ -33,27 +33,36 @@ function init() {
             visible: true
         },
         {
-            name: "Transaction ID",
+            name: "Customer Name",
             type: "text",
-            ref: "transactionId",
-            visible: true
-        },
-        {
-            name: "Item",
-            type: "text",
-            ref: "inventoryBrand",
-            visible: true
-        },
-        {
-            name: "Quantity",
-            type: "text",
-            ref: "transactionQuantity",
+            ref: "batchName",
             visible: true
         },
         {
             name: "Total Price",
             type: "text",
-            ref: "inventoryPrice",
+            ref: "batchPayment",
+            visible: "true"
+        },
+        {
+            name: "Delivery?",
+            type: "text",
+            ref: "batchDelivery",
+            visible: "true"
+        },
+        {
+            name: "Show Image",
+            type: "button",
+            method: "showImage",
+            args: "batchId",
+            other: "#showImage",
+            display: "Show",
+            visible: true
+        },
+        {
+            name: "Date",
+            type: "date",
+            ref: "batchDateCreated",
             visible: "true"
         },
         {
@@ -85,7 +94,7 @@ function init() {
 
 function refreshTable() {
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", window.location.origin + "/transactionList?page=" + encodeURIComponent(1));
+    xhr.open("GET", window.location.origin + "/transactionListG");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status == 200) {
@@ -251,6 +260,35 @@ function formatTable() {
         document.getElementById('searchField').innerHTML = searchHtml;
         if (dontChange) document.getElementById('searchField').value = savedSelection;
     }
+}
+
+function checkDetails(batch) {
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", window.location.origin + "/transactionBatch?batch=".concat(batch));
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            console.log(xhr.status);
+            //console.log(xhr.responseText);
+            if (xhr.status == 200) {
+                var trueData = JSON.parse(xhr.responseText);
+                console.log(trueData);
+                var tableData = trueData;
+                var inHtml = "";
+                tableData.forEach((item, index, arr) => {
+                    inHtml = inHtml.concat('<tr>');
+                    inHtml = inHtml.concat('<td>').concat(item.transactionQuantity).concat('</td>');
+                    inHtml = inHtml.concat('<td>').concat(item.inventoryBrand).concat('</td>');
+                    inHtml = inHtml.concat('<td>').concat(item.inventoryPrice202).concat('</td>');
+                    inHtml = inHtml.concat('</tr>');
+                })
+                document.getElementById('modalCheck').innerHTML = inHtml;
+            } else if (xhr.status == 500) {
+                console.log("WALA NA ERROR KASI");
+            }
+        }
+    };
+    //console.log('html = ' + "http://192.168.1.4:1337/admin/batch?=".concat(batch));
+    xhr.send();
 }
 
 function showAddModal() {

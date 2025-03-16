@@ -103,4 +103,54 @@ function openItem(item){
 
 function addItem(){
     document.getElementById('itemName').innerHTML = document.getElementById('itemNum'+selectedBatch).innerHTML;
+    var price202 = batchData[selectedBatch].inventoryPrice202;
+    var price304 = batchData[selectedBatch].inventoryPrice304;
+    var quantity202 = batchData[selectedBatch].inventoryQuantity202;
+    var quantity304 = batchData[selectedBatch].inventoryQuantity304;
+
+    document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
+    document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ '<br>Current Stock: '+quantity304;
+}
+
+function saveAdd() {
+    var quantity = document.getElementById('orderCount').value;
+    if (document.getElementById('202id').checked) {
+        var type = '202';
+        var price = batchData[selectedBatch].inventoryPrice202;
+    } else if (document.getElementById('304id').checked) {
+        var type = '304';
+        var price = batchData[selectedBatch].inventoryPrice304;
+    } else {
+        alert('Please select a type');
+        return;
+    }
+    if (quantity == 0) {
+        alert('Please enter a quantity');
+        return;
+    } else {
+        var details = {
+            itemId: batchData[selectedBatch].inventoryId,
+            quantity: quantity,
+            type: type,
+            price: price
+        };
+        console.log(details);
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", window.location.origin + "/saveOrder");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status == 200) {
+                    alert('Order added');
+                    $('#addModal').modal('hide');
+                    location.reload();
+                } else if (xhr.status == 404) {
+                    console.log("Order not found");
+                } else {
+                    console.log("Error: " + xhr.status);
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ details: details }));
+    }
 }
