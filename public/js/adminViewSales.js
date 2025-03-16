@@ -89,7 +89,7 @@ function init() {
     showConfirmed = '0';
     document.getElementById('searchText').value = '';
     savedSelection = 0;
-    refreshTable();
+    //refreshTable();
 }
 
 function refreshTable() {
