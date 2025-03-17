@@ -299,7 +299,7 @@ router.delete('/transaction', async function (req, res) {
 
 // INVENTORY //
 router.get('/inventoryList', async function (req, res) {
-    if (typeof req.session.access != "undefined" && typeof req.query.page != "undefined") {
+    if (typeof req.session.access != "undefined") {
         if (req.session.access == "Administrator" || req.session.access == "Secretary") {
             var db = await connect("root", "db_aemetal");
             try {
@@ -307,7 +307,7 @@ router.get('/inventoryList', async function (req, res) {
                 var highEnd = req.query.page * 10;
                 if (typeof req.query.searchTarget != "undefined" || typeof req.query.searchQuery != "undefined") {
                     var doContinue = true;
-                    var sql = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY inventoryId asc ) AS RowNum FROM tb_inventory WHERE ({{target}} LIKE ? or {{target}} LIKE ? or {{target}} LIKE ?) ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum";
+                    var sql = "SELECT * FROM tb_inventory WHERE {{target}} LIKE ? or {{target}} LIKE ? or {{target}} LIKE ?";
                     if (req.query.searchTarget == "brand") {
                         sql = sql.replaceAll("{{target}}", "inventoryBrand");
                     } else if (req.query.searchTarget == "category") {
@@ -318,7 +318,7 @@ router.get('/inventoryList', async function (req, res) {
                     if (doContinue) {
                         var [results, fields] = await db.query(
                             sql,
-                            ['%' + req.query.searchQuery, req.query.searchQuery + '%', '%' + req.query.searchQuery + '%', lowEnd, highEnd]
+                            ['%' + req.query.searchQuery, req.query.searchQuery + '%', '%' + req.query.searchQuery + '%']
                         );
                         var theData = {
                             items: []
@@ -357,8 +357,7 @@ router.get('/inventoryList', async function (req, res) {
                     }
                 } else {
                     var [results, fields] = await db.query(
-                        "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY inventoryId asc ) AS RowNum FROM tb_inventory ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
-                        [lowEnd, highEnd]
+                        "SELECT * FROM tb_inventory"
                     );
                     var theData = {
                         items: []
