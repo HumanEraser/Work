@@ -865,13 +865,13 @@ router.post('/checkOut', async function(req, res){
                     var truePrice = (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
                     total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
                     if(details.deliveryfee == ""){
-                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,?,?,?,?)"
-                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, new Date().toLocaleDateString(), details.customername, details.proofImage, 0]);
+                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?)"
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.proofImage, 0]);
                     }else{
                         total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
                         truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
-                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress) VALUES(?,?,?,?,?,?,?,?)"
-                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, new Date().toLocaleDateString(), details.customername, details.proofImage, 0, details.deliveryaddress]);
+                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?)"
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.proofImage, 0, details.deliveryaddress]);
                     }
                         
                 }
@@ -888,7 +888,10 @@ router.post('/checkOut', async function(req, res){
                 } else {
                     res.status(404).send();
                 }*/
+               
                 db.end();
+                req.session.orders = [];
+                res.status(200).send();
             } catch (err) {
                 db.end();
                 console.log("Error:", err);
