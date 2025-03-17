@@ -333,6 +333,7 @@ router.get('/inventoryList', async function (req, res) {
                             }
                             if(brandExist == -1){
                                 var l = {};
+                                l.itemId = results[k].inventoryId;
                                 l.name = results[k].inventoryBrand;
                                 theData.items.push(l);
                                 theData.items[theData.items.length-1].details = [];
@@ -372,6 +373,7 @@ router.get('/inventoryList', async function (req, res) {
                         }
                         if(brandExist == -1){
                             var l = {};
+                            l.itemId = results[k].inventoryId;
                             l.name = results[k].inventoryBrand;
                             theData.items.push(l);
                             theData.items[theData.items.length-1].details = [];
@@ -574,7 +576,8 @@ router.get('/secretary', async function (req, res) {
                     }
                 }
                 var trueData = {
-                    webData : theData.items
+                    webData : theData.items,
+                    orders: req.session.orders
                 }
                 db.end();
                 /*webData:[
@@ -593,6 +596,7 @@ router.get('/secretary', async function (req, res) {
                         }]
                     }
                 ]*/
+               console.log(trueData.webData[0].name);
                 res.render(path.join(__dirname, 'views/secretaryView.ejs'), trueData);
             } catch (err) {
                 console.log(err);
