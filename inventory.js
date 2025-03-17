@@ -575,6 +575,7 @@ router.get('/secretary', async function (req, res) {
                         theData.items[brandExist].details.push(l);
                     }
                 }
+                if(typeof (req.session.orders) == "undefined") req.session.orders = [];
                 var trueData = {
                     webData : theData.items,
                     orders: req.session.orders
@@ -596,7 +597,7 @@ router.get('/secretary', async function (req, res) {
                         }]
                     }
                 ]*/
-               console.log(trueData.webData[0].name);
+                console.log(trueData.webData[0].name);
                 res.render(path.join(__dirname, 'views/secretaryView.ejs'), trueData);
             } catch (err) {
                 console.log(err);
