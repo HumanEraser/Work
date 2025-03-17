@@ -303,8 +303,8 @@ router.get('/inventoryList', async function (req, res) {
         if (req.session.access == "Administrator" || req.session.access == "Secretary") {
             var db = await connect("root", "db_aemetal");
             try {
-                var lowEnd = ((req.query.page - 1) * 10) + 1;
-                var highEnd = req.query.page * 10;
+                //var lowEnd = ((req.query.page - 1) * 10) + 1;
+                //var highEnd = req.query.page * 10;
                 if (typeof req.query.searchTarget != "undefined" || typeof req.query.searchQuery != "undefined") {
                     var doContinue = true;
                     var sql = "SELECT * FROM tb_inventory WHERE {{target}} LIKE ? or {{target}} LIKE ? or {{target}} LIKE ?";
