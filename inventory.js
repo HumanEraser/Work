@@ -333,7 +333,7 @@ router.get('/inventoryList', async function (req, res) {
                             }
                             if(brandExist == -1){
                                 var l = {};
-                                l.itemId = results[k].inventoryId;
+                                l.itemId = results[k].inventorySId;
                                 l.name = results[k].inventoryBrand;
                                 theData.items.push(l);
                                 theData.items[theData.items.length-1].details = [];
@@ -373,7 +373,7 @@ router.get('/inventoryList', async function (req, res) {
                         }
                         if(brandExist == -1){
                             var l = {};
-                            l.itemId = results[k].inventoryId;
+                            l.itemId = results[k].inventorySId;
                             l.name = results[k].inventoryBrand;
                             theData.items.push(l);
                             theData.items[theData.items.length-1].details = [];
@@ -416,9 +416,16 @@ router.post('/inventory', async function (req, res) {
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
             try {
+                var [results, fields] = await db.query(
+                    "SELECT * FROM tb_inventory order by inventorySId desc limit 3"
+                )
                 await db.query(
-                    "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice202, inventoryPrice304, inventoryQuantity202, inventoryQuantity304) VALUES(?,?,?,?,?)",
-                    [details.brand, details.price202, details.price304, details.quantity202, details.quantity304]
+                    "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice, inventoryQuantity, inventoryType, inventorySId) VALUES(?,?,?,?,?)",
+                    [details.brand, details.price202, details.quantity202, details.type, results[0].inventorySId + 1]
+                );
+                await db.query(
+                    "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice, inventoryQuantity, inventoryType, inventorySId) VALUES(?,?,?,?,?)",
+                    [details.brand, details.price304, details.quantity304, details.type, results[0].inventorySId + 1]
                 );
                 db.end();
                 res.status(200).send();
@@ -441,7 +448,7 @@ router.get('/inventory/:id', async function (req, res) {
                 const inventoryId = req.params.id;
 
                 var [results, fields] = await db.query(
-                    "SELECT * FROM tb_inventory WHERE inventoryId = ?",
+                    "SELECT * FROM tb_inventory WHERE inventorySId = ?",
                     [inventoryId]
                 );
 
@@ -484,9 +491,15 @@ router.put('/inventory', async function (req, res) {
             var details = req.body.details;
             try {
                 await db.query(
-                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice202 = ?, inventoryPrice304 = ?, inventoryQuantity202 = ?, inventoryQuantity304 = ? WHERE inventoryId = ?",
-                    [details.brand, details.price202, details.price304, details.quantity202, details.quantity304, details.id]
+                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice = ?, inventoryQuantity = ? WHERE inventorySId = ? and inventoryType = ?",
+                    [details.brand, details.price202, details.quantity202, details.id, 202]
                 );
+
+                await db.query(
+                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice = ?, inventoryQuantity = ? WHERE inventorySId = ? and inventoryType = ?",
+                    [details.brand, details.price304, details.quantity304, details.id, 304]
+                );
+                
                 db.end();
                 res.status(200).send();
             } catch (err) {
@@ -509,7 +522,7 @@ router.delete('/inventory', async function (req, res) {
             var details = req.body.details;
             try {
                 await db.query(
-                    "Delete From tb_inventory WHERE inventoryId = ?",
+                    "Delete From tb_inventory WHERE inventorySId = ?",
                     [details.id]
                 );
                 db.end();
@@ -785,8 +798,10 @@ router.post('/saveOrder', async function (req, res) {
             console.log("Order details:", details);
             if (typeof req.session.orders == "undefined") req.session.orders = [];
             var order = {};
-            var itemSQL = "SELECT * FROM tb_inventory WHERE inventoryId = ?";
-            var [results, fields] = await db.query(itemSQL, [details.itemId]);
+            var itemSQL = "SELECT * FROM tb_inventory WHERE inventorySId = ? and inventoryType = ?";
+            var [results, fields] = await db.query(
+                itemSQL, [details.itemId, details.type]
+            );
             if (results.length > 0) {
                 order.item = results[0];
                 order.itemName = details.itemName;
