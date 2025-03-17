@@ -1,33 +1,40 @@
 import express from 'express';
-import { connect } from './sql.js';
+import {
+    connect
+} from './sql.js';
 import Cache from 'node-cache';
-import { myCacheList } from './myCache.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import {
+    fileURLToPath
+} from 'url';
+import {
+    dirname
+} from 'path';
 
 // Define __filename and __dirname
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(
+    import.meta.url);
 const __dirname = dirname(__filename);
 
 var router = express.Router();
 const myCache = new Cache();
-function isThisWeek (date) {
+
+function isThisWeek(date) {
     const now = new Date();
-  
+
     const weekDay = (now.getDay() + 6) % 7; // Make sure Sunday is 6, not 0
     const monthDay = now.getDate();
     const mondayThisWeek = monthDay - weekDay;
-  
+
     const startOfThisWeek = new Date(+now);
     startOfThisWeek.setDate(mondayThisWeek);
     startOfThisWeek.setHours(0, 0, 0, 0);
-  
+
     const startOfNextWeek = new Date(+startOfThisWeek);
     startOfNextWeek.setDate(mondayThisWeek + 7);
-  
+
     return date >= startOfThisWeek && date < startOfNextWeek;
-  }
+}
 
 router.get('/', async function (req, res) {
     res.render('index.ejs');
@@ -70,18 +77,18 @@ router.get('/stats', async function (req, res) {
                 var daySales = 0;
                 var weekSales = 0;
                 var yearSales = 0;
-                for (var i=0;i<results.length;++i){
+                for (var i = 0; i < results.length; ++i) {
                     var inputDate = new Date(results[i].transactionDate.split("T")[0]);
                     var todaysDate = new Date();
                     var thisSale = (parseInt(results[i].transactionPrice) * parseInt(results[i].transactionQuantity));
-                    if(inputDate.setHours(0,0,0,0) == todaysDate.setHours(0,0,0,0)) {
+                    if (inputDate.setHours(0, 0, 0, 0) == todaysDate.setHours(0, 0, 0, 0)) {
                         daySales += thisSale;
                         weekSales += thisSale;
                         yearSales += thisSale;
-                    }else if (isThisWeek(inputDate)){
+                    } else if (isThisWeek(inputDate)) {
                         weekSales += thisSale;
                         yearSales += thisSale;
-                    }else if(inputDate.getFullYear() == todaysDate.getFullYear()){
+                    } else if (inputDate.getFullYear() == todaysDate.getFullYear()) {
                         yearSales += thisSale;
                     }
                 }
@@ -313,8 +320,36 @@ router.get('/inventoryList', async function (req, res) {
                             sql,
                             ['%' + req.query.searchQuery, req.query.searchQuery + '%', '%' + req.query.searchQuery + '%', lowEnd, highEnd]
                         );
+                        var theData = {
+                            items: []
+                        };
+                        for (var k = 0; k < results.length; ++k) {
+                            var brandExist = -1;
+                            for(var l=0;l< theData.items.length;++l){
+                                if(theData.items[l].name == results[k].inventoryBrand){
+                                    brandExist = l;
+                                    break;
+                                }
+                            }
+                            if(brandExist == -1){
+                                var l = {};
+                                l.name = results[k].inventoryBrand;
+                                theData.items.push(l);
+                                theData.items[theData.items.length-1].details = [];
+                                theData.items[theData.items.length-1].details[0] = {};
+                                theData.items[theData.items.length-1].details[0].type = results[k].inventoryType;
+                                theData.items[theData.items.length-1].details[0].price = results[k].inventoryPrice;
+                                theData.items[theData.items.length-1].details[0].quantity = results[k].inventoryQuantity;
+                            }else{
+                                var l = {};
+                                l.type = results[k].inventoryType;
+                                l.price = results[k].inventoryPrice;
+                                l.quantity = results[k].inventoryQuantity;
+                                theData.items[brandExist].details.push(l);
+                            }
+                        }
                         db.end();
-                        res.status(200).send(results);
+                        res.status(200).send(theData.items);
                     } else {
                         db.end();
                         res.status(404).send();
@@ -324,8 +359,39 @@ router.get('/inventoryList', async function (req, res) {
                         "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY inventoryId asc ) AS RowNum FROM tb_inventory ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
                         [lowEnd, highEnd]
                     );
+                    var theData = {
+                        items: []
+                    };
+                    for (var k = 0; k < results.length; ++k) {
+                        var brandExist = -1;
+                        for(var l=0;l< theData.items.length;++l){
+                            if(theData.items[l].name == results[k].inventoryBrand){
+                                brandExist = l;
+                                break;
+                            }
+                        }
+                        if(brandExist == -1){
+                            var l = {};
+                            l.name = results[k].inventoryBrand;
+                            theData.items.push(l);
+                            theData.items[theData.items.length-1].details = [];
+                            theData.items[theData.items.length-1].details[0] = {};
+                            theData.items[theData.items.length-1].details[0].type = results[k].inventoryType;
+                            theData.items[theData.items.length-1].details[0].price = results[k].inventoryPrice;
+                            theData.items[theData.items.length-1].details[0].quantity = results[k].inventoryQuantity;
+                        }else{
+                            var l = {};
+                            l.type = results[k].inventoryType;
+                            l.price = results[k].inventoryPrice;
+                            l.quantity = results[k].inventoryQuantity;
+                            theData.items[brandExist].details.push(l);
+                        }
+                    }
+                    var trueData = {
+                        webData : theData.items
+                    }
                     db.end();
-                    res.status(200).send(results);
+                    res.status(200).send(theData.items);
                 }
             } catch (err) {
                 console.log(err);
@@ -371,29 +437,39 @@ router.get('/inventory/:id', async function (req, res) {
             var db = await connect("root", "db_aemetal");
             try {
                 const inventoryId = req.params.id;
-                
+
                 var [results, fields] = await db.query(
                     "SELECT * FROM tb_inventory WHERE inventoryId = ?",
                     [inventoryId]
                 );
+
                 
+
                 db.end();
-                
+
                 if (results.length > 0) {
                     res.status(200).send(results[0]);
                 } else {
-                    res.status(404).send({ message: "Inventory item not found" });
+                    res.status(404).send({
+                        message: "Inventory item not found"
+                    });
                 }
             } catch (err) {
                 console.log(err);
                 db.end();
-                res.status(404).send({ error: "Database error" });
+                res.status(404).send({
+                    error: "Database error"
+                });
             }
         } else {
-            res.status(403).send({ message: "Unauthorized access" });
+            res.status(403).send({
+                message: "Unauthorized access"
+            });
         }
     } else {
-        res.status(401).send({ message: "Not authenticated" });
+        res.status(401).send({
+            message: "Not authenticated"
+        });
     }
 });
 
@@ -465,30 +541,65 @@ router.get('/secretary', async function (req, res) {
         if (req.session.access != "Secretary") {
             res.redirect("/");
         } else {
+            var db = await connect("root", "db_aemetal");
             try {
-                var cachedData = await myCacheList();
-                var theData = (cachedData.get("biteClubData")).storeData;
-                var detected = false;
-                for (var i = 0; i < theData.items.length; ++i) {
-                    if (theData.items[i].merchantName == req.query.store) {
-                        detected = true;
-                        if (typeof req.session.orders == "undefined") req.session.orders = [];
-                        var trueData = {
-                            webData: req.session.orders
-                            
-                        };
-                        if (typeof req.session.orders != "undefined") trueData.cartCount = req.session.orders.length;
-                        else trueData.cartCount = 0;
-                        res.render(path.join(__dirname, 'views/secretaryView.ejs'), trueData);
-                        break;
+                var itemSQL = "SELECT * FROM tb_inventory";
+                var [iresults, ifields] = await db.query(itemSQL);
+                var theData = {
+                    items: []
+                };
+                for (var k = 0; k < iresults.length; ++k) {
+                    var brandExist = -1;
+                    for(var l=0;l< theData.items.length;++l){
+                        if(theData.items[l].name == iresults[k].inventoryBrand){
+                            brandExist = l;
+                            break;
+                        }
+                    }
+                    if(brandExist == -1){
+                        var l = {};
+                        l.name = iresults[k].inventoryBrand;
+                        theData.items.push(l);
+                        theData.items[theData.items.length-1].details = [];
+                        theData.items[theData.items.length-1].details[0] = {};
+                        theData.items[theData.items.length-1].details[0].type = iresults[k].inventoryType;
+                        theData.items[theData.items.length-1].details[0].price = iresults[k].inventoryPrice;
+                        theData.items[theData.items.length-1].details[0].quantity = iresults[k].inventoryQuantity;
+                    }else{
+                        var l = {};
+                        l.type = iresults[k].inventoryType;
+                        l.price = iresults[k].inventoryPrice;
+                        l.quantity = iresults[k].inventoryQuantity;
+                        theData.items[brandExist].details.push(l);
                     }
                 }
-                if (!detected) {
-                    res.status(404).send({ message: "Store not found" });
+                var trueData = {
+                    webData : theData.items
                 }
+                db.end();
+                /*webData:[
+                    {
+                        name:"asd",
+                        details:[{
+                            type:"202",
+                            price:"1",
+                            quantity:"1"
+                        },{
+                            type:"304",
+                            price:"1",
+                            quantity:"1"
+                        },{
+
+                        }]
+                    }
+                ]*/
+                res.render(path.join(__dirname, 'views/secretaryView.ejs'), trueData);
             } catch (err) {
                 console.log(err);
-                res.status(500).send({ error: "Internal Server Error" });
+                db.end();
+                res.status(500).send({
+                    error: "Internal Server Error"
+                });
             }
         }
     } else {
@@ -693,6 +804,84 @@ router.post('/saveOrder', async function (req, res) {
         res.status(500).send();
     }
 });
+
+router.post('/checkOut', async function(req, res){
+    var details={
+        customername:"",
+        proofImage:"",
+        deliveryfee:"",
+        deliveryaddress:"",
+        discount:""
+    }
+    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined" && typeof req.session.orders != "undefined") {
+        if(req.session.orders.length == 0){
+            console.log("Invalid session or request body");
+            res.status(500).send();
+        }else{
+            var db = await connect("root", "db_aemetal");
+            try {
+                var details = req.body.details;
+                console.log("Order details:", details);
+                var orders = req.session.orders;
+                var total = 0;
+
+                for(var i=0;i<req.session.orders.length - 1;++i){
+                    var truePrice = (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
+                    total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
+                    if(details.deliveryfee == ""){
+
+                    }else{
+                        total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
+                    }
+                        
+                }
+
+                var [results,fields] = await db.query("insert into tb_batchlist(batchPayment, batchName, batchDateCreated, batchReceipt) VALUES(?,?,?,?)"
+                            ,[total, details.customername, new Date().toLocaleDateString(), details.proofImage]);
+
+                total = 0;
+                for(var i=0;i<req.session.orders.length - 1;++i){
+                    var itemSQL = "insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof) VALUES(?,?,?,?,?,?)";
+                    var truePrice = (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
+                    total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
+                    if(details.deliveryfee == ""){
+                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,?,?,?,?)"
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, new Date().toLocaleDateString(), details.customername, details.proofImage, 0]);
+                    }else{
+                        total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress) VALUES(?,?,?,?,?,?,?,?)"
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, new Date().toLocaleDateString(), details.customername, details.proofImage, 0, details.deliveryaddress]);
+                    }
+                        
+                }
+                //if (typeof req.session.orders == "undefined") req.session.orders = [];
+                //var order = {};
+                /*var [results, fields] = await db.query(itemSQL, [details.itemId]);
+                if (results.length > 0) {
+                    order.item = results[0];
+                    order.quantity = details.quantity;
+                    order.type = details.type;
+                    order.price = details.price;
+                    req.session.orders.push(order);
+                    res.status(200).send();
+                } else {
+                    res.status(404).send();
+                }*/
+                db.end();
+            } catch (err) {
+                db.end();
+                console.log("Error:", err);
+                res.status(500).send();
+            }
+        }
+    }else {
+        console.log("Invalid session or request body");
+        res.status(500).send();
+    }
+});
+
 
 router.post('/delete', async function (req, res) {
     if (typeof req.body.details != "undefined" && typeof req.session.orders != "undefined") {
