@@ -1,3 +1,5 @@
+import { unclipArea } from "chart.js/helpers";
+
 var adminFieldList;
 var batchData;
 var selectedBatch;
@@ -19,7 +21,8 @@ var tableListDL;
 var btnImgDL = false;
 var a;
 var passTime;
-
+var batchLength;
+var deliCbox = false;
 function init() {
     adminFieldList = [{
         name: "Order List",
@@ -40,7 +43,7 @@ function init() {
 function refreshTable() {
     var page = 1;
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", window.location.origin + "/inventoryList?page=" + encodeURIComponent(page));
+    xhr.open("GET", window.location.origin + "/inventoryList");
     console.log(xhr.responseText);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -85,7 +88,7 @@ function formatTable() {
 
         batchData.forEach(function (item, index, arr) {
             console.log(item);
-            buttons += '<button class="itemBtns btn btn-primary" onclick="openItem('+index+')" id="itemNum'+index+'">' + item.inventoryBrand + '</button>';
+            buttons += '<button class="itemBtns btn btn-primary" onclick="openItem('+index+')" id="itemNum'+index+'">' + item.name + '</button>';
         });
         document.getElementById('itemList').innerHTML = buttons;
         /*      document.getElementById('tableHead').innerHTML = headHtml;
@@ -103,34 +106,57 @@ function openItem(item){
 
 function addItem(){
     document.getElementById('itemName').innerHTML = document.getElementById('itemNum'+selectedBatch).innerHTML;
-    var price202 = batchData[selectedBatch].inventoryPrice202;
-    var price304 = batchData[selectedBatch].inventoryPrice304;
-    var quantity202 = batchData[selectedBatch].inventoryQuantity202;
-    var quantity304 = batchData[selectedBatch].inventoryQuantity304;
+    var price202 = '';
+    var price304 = '';
+    var quantity202 = '';
+    var quantity304 = '';
+    batchLength = batchData[selectedBatch].details.length;
+    for(var i = 0; i < batchData[selectedBatch].details.length; i++){
+        if(batchData[selectedBatch].details[i].type == '202'){
+            price202 = batchData[selectedBatch].details[i].price;
+            quantity202 = batchData[selectedBatch].details[i].quantity;
+        } else if(batchData[selectedBatch].details[i].type == '304'){
+            price304 = batchData[selectedBatch].details[i].price;
+            quantity304 = batchData[selectedBatch].details[i].quantity;
+        }
+    }
 
-    document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
-    document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ '<br>Current Stock: '+quantity304;
+    if(quantity202 == 0){
+        document.getElementById('202Div').style.display = 'none';
+        document.getElementById('202id').checked = false;
+        document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ '<br>Current Stock: '+quantity304;
+    }
+    if(quantity304 == 0){
+        document.getElementById('304Div').style.display = 'none';
+        document.getElementById('304id').checked = false;
+        document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
+    }
+    console.log(batchData[selectedBatch].name);
 }
 
 function saveAdd() {
     var quantity = document.getElementById('orderCount').value;
-    if (document.getElementById('202id').checked) {
-        var type = '202';
-        var price = batchData[selectedBatch].inventoryPrice202;
-    } else if (document.getElementById('304id').checked) {
-        var type = '304';
-        var price = batchData[selectedBatch].inventoryPrice304;
-    } else {
-        alert('Please select a type');
-        return;
+    var type = '';
+    var price = '';
+    if(batchLength > 1){
+        if(document.getElementById('202id').checked){
+            type = '202';
+            price = batchData[selectedBatch].details[0].price;
+        } else if(document.getElementById('304id').checked){
+            type = '304';
+            price = batchData[selectedBatch].details[1].price;
+        }
+    }else{
+        type = batchData[selectedBatch].details[0].type;
+        price = batchData[selectedBatch].details[0].price;
     }
     if (quantity == 0) {
         alert('Please enter a quantity');
         return;
     } else {
         var details = {
-            itemId: batchData[selectedBatch].inventoryId,
-            itemName: batchData[selectedBatch].inventoryBrand,
+            itemId: batchData[selectedBatch].itemId,
+            itemName: batchData[selectedBatch].name,
             quantity: quantity,
             type: type,
             price: price
@@ -153,5 +179,82 @@ function saveAdd() {
             }
         };
         xhr.send(JSON.stringify({ details: details }));
+    }
+}
+
+function removeItem(batch){
+    var details = {
+        index: batch
+    };
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", window.location.origin + "/delete");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status == 200) {
+                alert('Item removed');
+                location.reload();
+            } else if (xhr.status == 404) {
+                console.log("Item not found");
+            } else {
+                console.log("Error: " + xhr.status);
+            }
+        }
+    };
+    xhr.send(JSON.stringify({ details: details }));
+}
+
+function toCheckOut(){
+    $('#checkOutModal').modal('show');
+}
+
+function checkOutBtn(){
+    var csName = '';
+    var pImg = '';
+    var delfee = '';
+    var deladd = '';
+    var discount = '';
+
+    if(document.getElementById('proofImage').value == ''){
+        alert('Please upload a proof of payment');
+        return;
+    }else{
+        csName = document.getElementById('customerName').value;
+        pImg = document.getElementById('proofImage').value;
+        delfee = document.getElementById('sf').value;
+        deladd = document.getElementById('address').value;
+        discount = document.getElementById('discount').value;
+        var details = {
+            customername: csName,
+            proofImage: pImg,
+            deliveryFee: delfee,
+            deliveryAddress: deladd,
+            discount: discount
+        };
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", window.location.origin + "/checkOut");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status == 200) {
+                    alert('Transaction Complete');
+                    location.reload();
+                } else if (xhr.status == 404) {
+                    console.log("Order not found");
+                } else {
+                    console.log("Error: " + xhr.status);
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ details: details })); 
+    }
+
+}
+
+function openDeliveryThing(){
+    if(document.getElementById('deliver').checked){
+        document.getElementById('ifDeliver').style.display = 'block';
+    }else{
+        document.getElementById('ifDeliver').style.display = 'none';
     }
 }
