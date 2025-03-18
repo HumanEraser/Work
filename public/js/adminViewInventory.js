@@ -31,7 +31,7 @@ function init() {
     adminFieldList = [{
             name: "Item Name",
             type: "text",
-            ref: "inventoryBrand",
+            ref: "name",
             visible: true
 
         },
@@ -121,7 +121,7 @@ function formatTable() {
         }else{
             trueData = batchData.data;
         }*/
-
+/*        var batchLength = batchData[0].details.length;
         batchData.slice().reverse().forEach(function (item, index, arr) {
             adminFieldList.forEach(function (aItem, aIndex, aArr) {
                 var colorClass = '';
@@ -184,7 +184,11 @@ function formatTable() {
                         if (aItem.type == 'text') {
                             if (aItem.ref == 'batchDateCreated') {
                                 bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('"><time datetime="').concat(item[aItem.ref.getDate()]).concat('"</td>'));
-                            } else {
+                            }else if(aItem.ref == 'inventoryPrice202'){
+                                bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat('Php ').concat(item.details[index].price).concat('</td>'));
+                                console.log(batchData[index].details[index].type);
+                            }
+                            else {
                                 bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
                             }
                         }
@@ -214,6 +218,42 @@ function formatTable() {
                     bodyHtml = bodyHtml.concat('</tr>');
                 }
             }
+        }); */
+
+        batchData.forEach(function (item, index, arr) {
+            var price202 = '0';
+            var price304 = '0';
+            var quantity202 = '0';
+            var quantity304 = '0';
+            if (index == 0) {
+                adminFieldList.forEach(function (aItem, aIndex, aArr) {
+                    if (aItem.visible) headHtml = headHtml.concat('<th scope="col" class="text-center">').concat(aItem.name).concat('</th>')
+                    setHtml = setHtml.concat('<tr><td class="text-center">').concat(aItem.name).concat('</td>');
+                    if (aItem.visible) setHtml = setHtml.concat('<td class="text-center"><button onclick="setFieldSetting(').concat(aIndex).concat(',0)" class="btn btn-success">Visible</button></td>');
+                    else setHtml = setHtml.concat('<td class="text-center"><button onclick="setFieldSetting(').concat(aIndex).concat(',0)" class="btn btn-danger">Invisible</button></td>');
+                    setHtml = setHtml.concat('<td class="text-center"><button id="btnUD1" onclick="setFieldSetting(').concat(aIndex).concat(',-1)" class="btn btn-primary me-1">Move up</button><button id="btnUD2" onclick="setFieldSetting(').concat(aIndex).concat(',1)" class="btn btn-primary ">Move Down</button></td></tr>')
+                    if (aItem.visible && (aItem.type == 'text' || aItem.type == 'date')) {
+                        searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('">'.concat(aItem.name).concat('</option>'));
+                        if (savedSelection == aIndex) dontChange = true;
+                    }
+                });
+            }
+            bodyHtml = bodyHtml.concat('<tr> <td class="text-center">').concat(item.name).concat('</td>');
+            for(var i = 0; i < batchData[index].details.length; i++){
+                if(batchData[index].details[i].type == '202'){
+                    price202 = batchData[index].details[i].price;
+                    quantity202 = batchData[index].details[i].quantity;
+                } else if(batchData[index].details[i].type == '304'){
+                    price304 = batchData[index].details[i].price;
+                    quantity304 = batchData[index].details[i].quantity;
+                }
+            }
+            bodyHtml = bodyHtml.concat('<td class="text-center" id="price202').concat(index).concat('">').concat(price202).concat('</td>');
+            bodyHtml = bodyHtml.concat('<td class="text-center" id="price304').concat(index).concat('">').concat(price304).concat('</td>');
+            bodyHtml = bodyHtml.concat('<td class="text-center" id="quantity202').concat(index).concat('">').concat(quantity202).concat('</td>');
+            bodyHtml = bodyHtml.concat('<td class="text-center" id="quantity304').concat(index).concat('">').concat(quantity304).concat('</td>');
+            bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="editModal(').concat(index).concat(')" class="btn btn-primary">Edit</button></td>');
+            bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="deleteModal(').concat(index).concat(')" class="btn btn-danger">Delete</button></td></tr>');
         });
         document.getElementById('tableHead').innerHTML = headHtml;
         document.getElementById('tableBody').innerHTML = bodyHtml;
@@ -252,7 +292,9 @@ function saveAdd() {
             price202: inPrice,
             price304: inPrice2,
             quantity202: quanti202,
-            quantity304: quanti304
+            quantity304: quanti304,
+            type202: '202',
+            type304: '304'
         }
     };
     console.log(data);
@@ -277,28 +319,25 @@ function editModal(inventoryId) {
     selectedBatch = inventoryId;
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", window.location.origin + "/inventory/" + encodeURIComponent(inventoryId));
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status == 200) {
-                editBatch = JSON.parse(xhr.responseText);
-                console.log(editBatch);
-                document.getElementById('inProductIdNew').value = editBatch.inventoryBrand;
-                document.getElementById('inPPINew').value = editBatch.inventoryPrice202;
-                document.getElementById('inPPI2New').value = editBatch.inventoryPrice304;
-                document.getElementById('inQuanti202New').value = editBatch.inventoryQuantity202;
-                document.getElementById('inQuanti304New').value = editBatch.inventoryQuantity304;
-            } else if (xhr.status == 404) {
-                console.log("Inventory item not found");
-                reject("Item not found");
-            } else {
-                console.log("Error fetching inventory item");
-                reject("Error fetching item");
-            }
+    var price202 = '';
+    var price304 = '';
+    var quantity202 = '';
+    var quantity304 = '';
+    batchLength = batchData[selectedBatch].details.length;
+    for(var i = 0; i < batchData[selectedBatch].details.length; i++){
+        if(batchData[selectedBatch].details[i].type == '202'){
+            price202 = batchData[selectedBatch].details[i].price;
+            quantity202 = batchData[selectedBatch].details[i].quantity;
+        } else if(batchData[selectedBatch].details[i].type == '304'){
+            price304 = batchData[selectedBatch].details[i].price;
+            quantity304 = batchData[selectedBatch].details[i].quantity;
         }
-    };
-    xhr.send();
+    }
+    document.getElementById('inProductIdNew').value = batchData[selectedBatch].name;
+    document.getElementById('inPPINew').value = price202;
+    document.getElementById('inPPI2New').value = price304;
+    document.getElementById('inQuanti202New').value = quantity202;
+    document.getElementById('inQuanti304New').value = quantity304;
 }
 
 function saveEdit() {

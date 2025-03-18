@@ -420,11 +420,11 @@ router.post('/inventory', async function (req, res) {
                 )
                 await db.query(
                     "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice, inventoryQuantity, inventoryType, inventorySId) VALUES(?,?,?,?,?)",
-                    [details.brand, details.price202, details.quantity202, details.type, results[0].inventorySId + 1]
+                    [details.brand, details.price202, details.quantity202, details.type202, results[0].inventorySId + 1]
                 );
                 await db.query(
                     "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice, inventoryQuantity, inventoryType, inventorySId) VALUES(?,?,?,?,?)",
-                    [details.brand, details.price304, details.quantity304, details.type, results[0].inventorySId + 1]
+                    [details.brand, details.price304, details.quantity304, details.type304, results[0].inventorySId + 1]
                 );
                 db.end();
                 res.status(200).send();

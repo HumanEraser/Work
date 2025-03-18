@@ -1,4 +1,4 @@
-import { unclipArea } from "chart.js/helpers";
+//import { unclipArea } from "chart.js/helpers";
 
 var adminFieldList;
 var batchData;
@@ -23,6 +23,7 @@ var a;
 var passTime;
 var batchLength;
 var deliCbox = false;
+
 function init() {
     adminFieldList = [{
         name: "Order List",
@@ -126,10 +127,13 @@ function addItem(){
         document.getElementById('202id').checked = false;
         document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ '<br>Current Stock: '+quantity304;
     }
-    if(quantity304 == 0){
+    else if(quantity304 == 0){
         document.getElementById('304Div').style.display = 'none';
         document.getElementById('304id').checked = false;
         document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
+    }else{
+        document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
+        document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ "<br>Current Stock: "+quantity304;   
     }
     console.log(batchData[selectedBatch].name);
 }
@@ -220,33 +224,41 @@ function checkOutBtn(){
         return;
     }else{
         csName = document.getElementById('customerName').value;
-        pImg = document.getElementById('proofImage').value;
         delfee = document.getElementById('sf').value;
         deladd = document.getElementById('address').value;
         discount = document.getElementById('discount').value;
         var details = {
             customername: csName,
-            proofImage: pImg,
             deliveryFee: delfee,
             deliveryAddress: deladd,
             discount: discount
         };
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", window.location.origin + "/checkOut");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status == 200) {
-                    alert('Transaction Complete');
-                    location.reload();
-                } else if (xhr.status == 404) {
-                    console.log("Order not found");
-                } else {
-                    console.log("Error: " + xhr.status);
+        let photo = document.getElementById("imgUp").files[0];
+        let formData = new FormData();
+        if (photo != null) {
+            formData.append("file", photo);
+            formData.append("details", JSON.stringify(details));
+            xhr.open("POST", window.location.origin + "/checkOut");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status == 200) {
+                        alert('Transaction Complete');
+                        location.reload();
+                    } else if (xhr.status == 404) {
+                        console.log("Order not found");
+                    } else {
+                        console.log("Error: " + xhr.status);
+                    }
                 }
-            }
-        };
-        xhr.send(JSON.stringify({ details: details })); 
+            };
+            xhr.send(formData); 
+        }else{
+            alert('Please upload a proof of payment');
+            return;
+        }
+
     }
 
 }
@@ -257,4 +269,21 @@ function openDeliveryThing(){
     }else{
         document.getElementById('ifDeliver').style.display = 'none';
     }
+}
+
+function searchInvent(){
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", window.location.origin + "/inventoryList?searchQuery=" + encodeURIComponent(document.getElementById('searchText').value) + 
+    "&searchTarget=" + document.getElementById('searchField').value);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status == 200) {
+                batchData = JSON.parse(xhr.responseText);
+                formatTable();
+            } else if (xhr.status == 404) {
+                console.log("GAGFSADFDS");
+            }
+        }
+    };
+    xhr.send();
 }
