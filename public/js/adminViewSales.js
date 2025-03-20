@@ -1,3 +1,5 @@
+//import e = require("express");
+
 var data;
 var adminFieldList;
 var batchData;
@@ -23,13 +25,19 @@ var btnImgDL = false;
 var a;
 var passTime;
 function init() {
-    adminFieldList = [{
+    adminFieldList = [/* {
             name: "Order List",
             type: "button",
             method: "checkDetails",
-            args: "transactionId",
+            args: "transactionBatch",
             other: "#myModal",
             display: "Show Orders",
+            visible: true
+        }, */
+        {
+            name: "Item Name",
+            type: "text",
+            ref: "inventoryBrand",
             visible: true
         },
         {
@@ -51,7 +59,7 @@ function init() {
             visible: "true"
         },
         {
-            name: "Show Image",
+            name: "Proof of Payment",
             type: "button",
             method: "showImage",
             args: "batchId",
@@ -173,7 +181,10 @@ function formatTable() {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('"><time datetime="').concat(item[aItem.ref.getDate()]).concat('"</td>'));
                                     } else if(aItem.ref == 'batchClaimTime') {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref].replace("|||"," - ")).concat('</td>'));
-                                    } else {
+                                    }else if(aItem.ref == 'transactionPrice'){
+                                        var a = item[aItem.ref].toLocaleString();
+                                        bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
+                                    }else {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
                                     }
                                 }
@@ -219,6 +230,11 @@ function formatTable() {
                                     
                                 }else if(aItem.ref == 'batchClaimTime') {
                                     bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref].replace("|||"," - ")).concat('</td>'));
+                                }else if(aItem.ref == 'transactionPrice'){
+                                    console.log(item[aItem.ref]);
+                                    var a = parseInt(item[aItem.ref]).toLocaleString();
+                                    console.log(a);
+                                    bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
                                 }else {
                                     bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
                                 }
