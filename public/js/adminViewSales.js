@@ -27,7 +27,7 @@ function init() {
             name: "Order List",
             type: "button",
             method: "checkDetails",
-            args: "batchId",
+            args: "transactionId",
             other: "#myModal",
             display: "Show Orders",
             visible: true
@@ -35,19 +35,19 @@ function init() {
         {
             name: "Customer Name",
             type: "text",
-            ref: "batchName",
+            ref: "transactionCustomerName",
             visible: true
         },
         {
             name: "Total Price",
             type: "text",
-            ref: "batchPayment",
+            ref: "transactionPrice",
             visible: "true"
         },
         {
             name: "Delivery?",
             type: "text",
-            ref: "batchDelivery",
+            ref: "transactionDelivery",
             visible: "true"
         },
         {
@@ -62,7 +62,7 @@ function init() {
         {
             name: "Date",
             type: "date",
-            ref: "batchDateCreated",
+            ref: "transactionDate",
             visible: "true"
         },
         {
@@ -89,12 +89,12 @@ function init() {
     showConfirmed = '0';
     document.getElementById('searchText').value = '';
     savedSelection = 0;
-    //refreshTable();
+    refreshTable();
 }
 
 function refreshTable() {
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", window.location.origin + "/transactionListG");
+    xhr.open("GET", window.location.origin + "/transactionList?page=" + encodeURIComponent(1));
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status == 200) {

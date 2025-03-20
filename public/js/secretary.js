@@ -89,7 +89,7 @@ function formatTable() {
 
         batchData.forEach(function (item, index, arr) {
             console.log(item);
-            buttons += '<button class="itemBtns btn btn-primary" onclick="openItem('+index+')" id="itemNum'+index+'">' + item.name + '</button>';
+            buttons += '<button class="btn btn-primary itemBtns text-center " onclick="openItem('+index+')" id="itemNum'+index+'">' + item.name + '</button>';
         });
         document.getElementById('itemList').innerHTML = buttons;
         /*      document.getElementById('tableHead').innerHTML = headHtml;
@@ -125,15 +125,19 @@ function addItem(){
     if(quantity202 == 0){
         document.getElementById('202Div').style.display = 'none';
         document.getElementById('202id').checked = false;
-        document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ '<br>Current Stock: '+quantity304;
+        document.getElementById('304Stock').innerHTML = quantity304;
+        document.getElementById('304Price').innerHTML = price304;
     }
     else if(quantity304 == 0){
         document.getElementById('304Div').style.display = 'none';
         document.getElementById('304id').checked = false;
-        document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
+        document.getElementById('202Stock').innerHTML = quantity202;
+        document.getElementById('202Price').innerHTML = price202;
     }else{
-        document.getElementById('202Stock').innerHTML = '202<br>Price: '+price202+ "<br>Current Stock: "+quantity202;
-        document.getElementById('304Stock').innerHTML = '304<br>Price: '+price304+ "<br>Current Stock: "+quantity304;   
+        document.getElementById('202Stock').innerHTML = quantity202;
+        document.getElementById('202Price').innerHTML = price202;
+        document.getElementById('304Stock').innerHTML = quantity304;
+        document.getElementById('304Price').innerHTML = price304;   
     }
     console.log(batchData[selectedBatch].name);
 }
