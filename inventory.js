@@ -10,6 +10,9 @@ import {
 import {
     dirname
 } from 'path';
+import {
+    formidable
+} from 'formidable';
 
 // Define __filename and __dirname
 const __filename = fileURLToPath(
@@ -420,11 +423,11 @@ router.post('/inventory', async function (req, res) {
                 )
                 await db.query(
                     "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice, inventoryQuantity, inventoryType, inventorySId) VALUES(?,?,?,?,?)",
-                    [details.brand, details.price202, details.quantity202, details.type202, results[0].inventorySId + 1]
+                    [details.brand, details.price202, details.quantity202, details.type202, parseInt(results[0].inventorySId) + 1]
                 );
                 await db.query(
                     "INSERT INTO tb_inventory (inventoryBrand, inventoryPrice, inventoryQuantity, inventoryType, inventorySId) VALUES(?,?,?,?,?)",
-                    [details.brand, details.price304, details.quantity304, details.type304, results[0].inventorySId + 1]
+                    [details.brand, details.price304, details.quantity304, details.type304, parseInt(results[0].inventorySId) + 1]
                 );
                 db.end();
                 res.status(200).send();
@@ -832,14 +835,32 @@ router.post('/checkOut', async function(req, res){
         deliveryaddress:"",
         discount:""
     }
-    if (typeof req.session.access != "undefined" && typeof req.body.details != "undefined" && typeof req.session.orders != "undefined") {
+    if (typeof req.session.access != "undefined" && typeof req.session.orders != "undefined") {
         if(req.session.orders.length == 0){
             console.log("Invalid session or request body");
             res.status(500).send();
         }else{
             var db = await connect("root", "db_aemetal");
             try {
-                var details = req.body.details;
+                const form = formidable({
+                    uploadDir: path.join(path.dirname(__dirname), 'upload'), // don't forget the __dirname here
+                    keepExtensions: true,
+                    maxFileSize: (5 * 1024 * 1024)
+                });
+                var doContinue = true;
+        
+                var formfields = await new Promise(function (resolve, reject) {
+                    form.parse(req, function (err, fields, files) {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        //console.log("within form.parse method, subject field of fields object is: " + fields.subjects);
+                        resolve([fields, files]);
+                    }); // form.parse
+                });
+                var details = JSON.parse(JSON.parse(JSON.stringify(formfields))[0].details[0]);
+                console.log(details);
                 console.log("Order details:", details);
                 var orders = req.session.orders;
                 var total = 0;
@@ -857,7 +878,7 @@ router.post('/checkOut', async function(req, res){
                 }
 
                 var [results,fields] = await db.query("insert into tb_batchlist(batchPayment, batchName, batchDateCreated, batchReceipt) VALUES(?,?,?,?)"
-                            ,[total, details.customername, new Date().toLocaleDateString(), details.proofImage]);
+                            ,[total, details.customername, new Date().toLocaleDateString(), JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename]);
 
                 total = 0;
                 for(var i=0;i<req.session.orders.length - 1;++i){
@@ -866,12 +887,12 @@ router.post('/checkOut', async function(req, res){
                     total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
                     if(details.deliveryfee == ""){
                         await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?)"
-                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.proofImage, 0]);
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0]);
                     }else{
                         total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
                         truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
                         await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?)"
-                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.proofImage, 0, details.deliveryaddress]);
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0, details.deliveryaddress]);
                     }
                         
                 }
