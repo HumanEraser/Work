@@ -238,13 +238,13 @@ function checkOutBtn(){
             discount: discount
         };
         let xhr = new XMLHttpRequest();
-        let photo = document.getElementById("imgUp").files[0];
+        let photo = document.getElementById("proofImage").files[0];
         let formData = new FormData();
         if (photo != null) {
             formData.append("file", photo);
             formData.append("details", JSON.stringify(details));
             xhr.open("POST", window.location.origin + "/checkOut");
-            xhr.setRequestHeader("Content-Type", "application/json");
+            //xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status == 200) {
@@ -262,9 +262,7 @@ function checkOutBtn(){
             alert('Please upload a proof of payment');
             return;
         }
-
     }
-
 }
 
 function openDeliveryThing(){
