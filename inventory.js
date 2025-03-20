@@ -828,13 +828,13 @@ router.post('/saveOrder', async function (req, res) {
 });
 
 router.post('/checkOut', async function(req, res){
-    var details={
+    /*var details={
         customername:"",
         proofImage:"",
         deliveryfee:"",
         deliveryaddress:"",
         discount:""
-    }
+    }*/
     if (typeof req.session.access != "undefined" && typeof req.session.orders != "undefined") {
         if(req.session.orders.length == 0){
             console.log("Invalid session or request body");
@@ -861,18 +861,19 @@ router.post('/checkOut', async function(req, res){
                 });
                 var details = JSON.parse(JSON.parse(JSON.stringify(formfields))[0].details[0]);
                 console.log(details);
-                console.log("Order details:", details);
+                //console.log("Order details:", details);
                 var orders = req.session.orders;
+                console.log(orders);
                 var total = 0;
 
-                for(var i=0;i<req.session.orders.length - 1;++i){
+                for(var i=0;i<orders.length;++i){
                     var truePrice = (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
                     total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
-                    if(details.deliveryfee == ""){
+                    if(details.deliveryFee == ""){
 
                     }else{
-                        total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
-                        truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryFee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryFee).toFixed(2)) * 100)) / 100).toFixed(2);
                     }
                         
                 }
@@ -881,16 +882,16 @@ router.post('/checkOut', async function(req, res){
                             ,[total, details.customername, new Date().toLocaleDateString(), JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename]);
 
                 total = 0;
-                for(var i=0;i<req.session.orders.length - 1;++i){
+                for(var i=0;i<orders.length;++i){
                     var itemSQL = "insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof) VALUES(?,?,?,?,?,?)";
                     var truePrice = (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
                     total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
-                    if(details.deliveryfee == ""){
+                    if(details.deliveryFee == ""){
                         await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?)"
                             ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0]);
                     }else{
-                        total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
-                        truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryfee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryFee).toFixed(2)) * 100)) / 100).toFixed(2);
+                        truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryFee).toFixed(2)) * 100)) / 100).toFixed(2);
                         await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?)"
                             ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0, details.deliveryaddress]);
                     }
