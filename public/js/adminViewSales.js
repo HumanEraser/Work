@@ -35,15 +35,21 @@ function init() {
             visible: true
         }, */
         {
+            name: "Customer Name",
+            type: "text",
+            ref: "transactionCustomerName",
+            visible: true
+        },
+        {
             name: "Item Name",
             type: "text",
             ref: "inventoryBrand",
             visible: true
         },
         {
-            name: "Customer Name",
+            name: "Quantity",
             type: "text",
-            ref: "transactionCustomerName",
+            ref: "transactionQuantity",
             visible: true
         },
         {
