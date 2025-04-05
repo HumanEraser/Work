@@ -44,7 +44,7 @@ function init() {
 function refreshTable() {
     var page = 1;
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", window.location.origin + "/inventoryList");
+    xhr.open("GET", window.location.origin + "/inventoryList?page=" + encodeURIComponent(page));
     console.log(xhr.responseText);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -109,8 +109,9 @@ function addItem(){
     document.getElementById('itemName').innerHTML = document.getElementById('itemNum'+selectedBatch).innerHTML;
     var price202 = '';
     var price304 = '';
-    var quantity202 = '';
-    var quantity304 = '';
+    var quantity202 = 0;
+    var quantity304 = 0;
+    var tableBody = '';
     batchLength = batchData[selectedBatch].details.length;
     for(var i = 0; i < batchData[selectedBatch].details.length; i++){
         if(batchData[selectedBatch].details[i].type == '202'){
@@ -121,24 +122,13 @@ function addItem(){
             quantity304 = batchData[selectedBatch].details[i].quantity;
         }
     }
-
-    if(quantity202 == 0){
-        document.getElementById('202Div').style.display = 'none';
-        document.getElementById('202id').checked = false;
-        document.getElementById('304Stock').innerHTML = quantity304;
-        document.getElementById('304Price').innerHTML = price304;
+    if(quantity202 > 0){
+        tableBody += '<tr><td>202</td><td>'+ quantity202 + '</td><td>'+ price202 +'</td><td><input type="radio" id="202id" name="fav_language" value="202"></td></tr>';
     }
-    else if(quantity304 == 0){
-        document.getElementById('304Div').style.display = 'none';
-        document.getElementById('304id').checked = false;
-        document.getElementById('202Stock').innerHTML = quantity202;
-        document.getElementById('202Price').innerHTML = price202;
-    }else{
-        document.getElementById('202Stock').innerHTML = quantity202;
-        document.getElementById('202Price').innerHTML = price202;
-        document.getElementById('304Stock').innerHTML = quantity304;
-        document.getElementById('304Price').innerHTML = price304;   
+    if(quantity304 > 0){
+        tableBody += '<tr><td>304</td><td>'+ quantity304 + '</td><td>'+ price304 +'</td><td><input type="radio" id="304id" name="fav_language" value="304"></td></tr>';
     }
+    document.getElementById('tableBody').innerHTML = tableBody;
     console.log(batchData[selectedBatch].name);
 }
 
@@ -222,6 +212,7 @@ function checkOutBtn(){
     var delfee = '';
     var deladd = '';
     var discount = '';
+    var SIN = '';
 
     if(document.getElementById('proofImage').value == ''){
         alert('Please upload a proof of payment');
@@ -231,11 +222,13 @@ function checkOutBtn(){
         delfee = document.getElementById('sf').value;
         deladd = document.getElementById('address').value;
         discount = document.getElementById('discount').value;
+        SIN = document.getElementById('SIN').value;
         var details = {
             customername: csName,
             deliveryFee: delfee,
             deliveryAddress: deladd,
-            discount: discount
+            discount: discount,
+            salesInvoiceNumber: SIN,
         };
         let xhr = new XMLHttpRequest();
         let photo = document.getElementById("proofImage").files[0];
@@ -276,7 +269,7 @@ function openDeliveryThing(){
 function searchInvent(){
     let xhr = new XMLHttpRequest();
     xhr.open("GET", window.location.origin + "/inventoryList?searchQuery=" + encodeURIComponent(document.getElementById('searchText').value) + 
-    "&searchTarget=" + document.getElementById('searchField').value);
+    "&searchTarget=" + encodeURIComponent('brand'));
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status == 200) {
@@ -288,4 +281,31 @@ function searchInvent(){
         }
     };
     xhr.send();
+}
+
+function logout(){
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", window.location.origin + "/logout");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status == 200) {
+                window.location.href = '/';
+            } else if (xhr.status == 404) {
+                console.log("GAGFSADFDS");
+            }
+        }
+    };
+    xhr.send();
+}
+
+function cancelOut(){
+    $('#checkOutModal').modal('hide');
+    document.getElementById('customerName').value = '';
+    document.getElementById('address').value = '';
+    document.getElementById('sf').value = '';
+    document.getElementById('SIN').value = '';
+    document.getElementById('proofImage').value = '';
+    document.getElementById('deliver').checked = false;
+    document.getElementById('ifDeliver').style.display = 'none';
+    document.getElementById('customerName').value = '';
 }

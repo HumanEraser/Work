@@ -24,7 +24,6 @@ var tableListDL;
 var btnImgDL = false;
 var a;
 var passTime;
-var details;
 function init() {
     adminFieldList = [/* {
             name: "Order List",
@@ -75,44 +74,17 @@ function init() {
             visible: true
         },
         {
-            name: "Sales Invoice Number",
-            type: "text",
-            ref: "transactionSalesInvoiceNumber",
-            visible: "true"
-        },
-        {
             name: "Date",
             type: "date",
             ref: "transactionDate",
             visible: "true"
         },
         {
-            name: "Edit Transaction",
-            type: "button",
-            method: "editModal",
-            args: "transactionId",
-            other: "#editModal",
-            display: "Edit",
-            visible: true
+            name: "Sales Invoice Number",
+            type: "text",
+            ref: "transactionSalesInvoiceNumber",
+            visible: "true"
         },
-        {
-            name: "Accept Transaction",
-            type: "button",
-            method: "acceptModal",
-            args: "transactionId",
-            other: "#acceptModal",
-            display: "Accept",
-            visible: true
-        },
-        {
-            name: "Void Transaction",
-            type: "button",
-            method: "deleteModal",
-            args: "transactionId",
-            other: "#deleteModal",
-            display: "Void",
-            visible: true
-        }
 
     ];
     trueFieldList = adminFieldList;
@@ -182,7 +154,7 @@ function formatTable() {
                             if (savedSelection == aIndex) dontChange = true;
                         }
                     }
-                    if(batchData[index].transactionAccepted == 0){
+                    if(batchData[index].transactionAccepted == 1){
                         if (document.getElementById('searchText').value.length > 0) {
                             console.log(item[adminFieldList[document.getElementById('searchField').value].ref]);
                             if (item[adminFieldList[parseInt(document.getElementById('searchField').value)].ref].toLowerCase().includes(document.getElementById('searchText').value.toLowerCase())) {
@@ -253,7 +225,9 @@ function formatTable() {
                                     }else if(aItem.ref == 'batchClaimTime') {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref].replace("|||"," - ")).concat('</td>'));
                                     }else if(aItem.ref == 'transactionPrice'){
+                                        console.log(item[aItem.ref]);
                                         var a = parseInt(item[aItem.ref]).toLocaleString();
+                                        console.log(a);
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
                                     }else {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
@@ -284,9 +258,8 @@ function formatTable() {
                             }
                         }
                     }
-
                 });
-                
+   
             if (document.getElementById('searchText').value.length > 0) {
                 if (item[adminFieldList[document.getElementById('searchField').value].ref].toLowerCase().includes(document.getElementById('searchText').value.toLowerCase())) {
                     bodyHtml = bodyHtml.concat('</tr>');
@@ -417,48 +390,6 @@ function cancelAdd() {
     document.getElementById('inDiscount').value = '';
     document.getElementById('inSF').value = '';
 }
-
-function acceptModal(batch) {
-    selectedBatch = batch;
-    console.log(batch);
-    $('#acceptModal').modal('show');
-}
-
-function cancelTransaction() {
-    $('#acceptModal').modal('hide');
-    selectedBatch = null;
-}
-
-function saveTransaction(){
-    let xhr = new XMLHttpRequest();
-    xhr.open("PUT", window.location.origin + "/acceptTransaction", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("Accept", "application/json");
-    let data = {
-        details: {
-            id: selectedBatch, // Ensure selectedBatch is properly set before calling this function
-        }
-    };
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status == 200) {    
-                $('#acceptModal').modal('hide');
-                swal({
-                    title: "Transaction Accepted",
-                    text: ":D",
-                    timer: 2000
-                  });
-                refreshTable();
-            } else if (xhr.status == 404) {
-                console.log("GAGFSADFDS");
-            }
-        }
-    };
-    xhr.send(JSON.stringify(data));
-}
-
-
-
 
 function goSales() {
     window.location.replace("/sales");
