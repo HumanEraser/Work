@@ -25,6 +25,10 @@ var btnImgDL = false;
 var a;
 var passTime;
 var details;
+var searchInput;
+var searchInput2;
+var searchField = '';
+var isDelivery;
 function init() {
     adminFieldList = [/* {
             name: "Order List",
@@ -45,6 +49,12 @@ function init() {
             name: "Item Name",
             type: "text",
             ref: "inventoryBrand",
+            visible: true
+        },
+        {
+            name: "Item Type",
+            type: "text",
+            ref: "inventoryType",
             visible: true
         },
         {
@@ -115,6 +125,9 @@ function init() {
         }
 
     ];
+    searchInput = '';
+    searchInput2 = '0';
+    searchField = '';
     trueFieldList = adminFieldList;
     showConfirmed = '0';
     document.getElementById('searchText').value = '';
@@ -172,69 +185,28 @@ function formatTable() {
                     //else colorClass = "none";
                     if (index == 0) {
     
-                        if (aItem.visible) headHtml = headHtml.concat('<th scope="col" class="text-center">').concat(aItem.name).concat('</th>')
+                        if (aItem.visible) headHtml = headHtml.concat('<th scope="col" class="topTableText text-center">').concat(aItem.name).concat('</th>')
                         setHtml = setHtml.concat('<tr><td class="text-center">').concat(aItem.name).concat('</td>');
                         if (aItem.visible) setHtml = setHtml.concat('<td class="text-center"><button onclick="setFieldSetting(').concat(aIndex).concat(',0)" class="btn btn-success">Visible</button></td>');
                         else setHtml = setHtml.concat('<td class="text-center"><button onclick="setFieldSetting(').concat(aIndex).concat(',0)" class="btn btn-danger">Invisible</button></td>');
                         setHtml = setHtml.concat('<td class="text-center"><button id="btnUD1" onclick="setFieldSetting(').concat(aIndex).concat(',-1)" class="btn btn-primary me-1">Move up</button><button id="btnUD2" onclick="setFieldSetting(').concat(aIndex).concat(',1)" class="btn btn-primary ">Move Down</button></td></tr>')
                         if (aItem.visible && (aItem.type == 'text' || aItem.type == 'date')) {
-                            searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('">'.concat(aItem.name).concat('</option>'));
-                            if (savedSelection == aIndex) dontChange = true;
+                            if (aItem.ref == 'transactionPrice') {
+                            }else if (aItem.ref == 'transactionDelivery') {
+                            }else if (aItem.ref == 'transactionDate') {
+                            }else{
+                                if(aItem.name == searchField){
+                                    
+                                    searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('" Selected>'.concat(aItem.name).concat('</option>'));
+                                    }else{
+                                        searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('">'.concat(aItem.name).concat('</option>'));
+                                    }
+                            }
+                            
                         }
                     }
                     if(batchData[index].transactionAccepted == 0){
-                        if (document.getElementById('searchText').value.length > 0) {
-                            console.log(item[adminFieldList[document.getElementById('searchField').value].ref]);
-                            if (item[adminFieldList[parseInt(document.getElementById('searchField').value)].ref].toLowerCase().includes(document.getElementById('searchText').value.toLowerCase())) {
-                                if (aIndex == 0) bodyHtml = bodyHtml.concat('<tr>');
-                                if (aItem.visible) {
-                                    //edited
-                                    if (aItem.type == 'text') {
-        
-                                        if (aItem.ref == 'batchPaymentAmount') {
-        
-                                            if (item['batchPaymentMethod'].includes('PayPal')) {
-        
-                                                bodyHtml = bodyHtml.concat('<td class="randomTotalCost '.concat(colorClass).concat('"><div id="randomTotalCost">').concat(item[aItem.ref].replace('|', '<br>').replace('P', '₱') + ' USD').concat('</div></td>'));
-                                            } else {
-                                                bodyHtml = bodyHtml.concat('<td class="randomTotalCost '.concat(colorClass).concat('"><div id="randomTotalCost">').concat(item[aItem.ref]).replace('P', '₱').concat('</div></td>'));
-                                            }
-                                        }else if(aItem.ref == 'batchDateCreated'){
-                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('"><time datetime="').concat(item[aItem.ref.getDate()]).concat('"</td>'));
-                                        } else if(aItem.ref == 'batchClaimTime') {
-                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref].replace("|||"," - ")).concat('</td>'));
-                                        }else if(aItem.ref == 'transactionPrice'){
-                                            var a = item[aItem.ref].toLocaleString();
-                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
-                                        }else {
-                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
-                                        }
-                                    }
-                                    if (aItem.type == 'button') {
-                                        if (aItem.name == 'Options') {
-                                            bodyHtml = bodyHtml.concat('<td class="aksepDenay ').concat(colorClass).concat('">').concat('<a onclick="'.concat('acceptFree').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class=" btnAccept btn" data-bs-toggle="modal">Accept</a> &nbsp;'))
-                                                .concat('<a onclick="'.concat('denyTicket').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnDeny btn" data-bs-toggle="modal">Deny</a></ttd>'));
-                                        } else if (aItem.name == 'Edit') {
-                                            bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
-                                        } else {
-                                            bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
-                                        }
-        
-                                        //to here
-                                    }
-                                    if (aItem.type == 'date') {
-                                        var theDate = new Date(item[aItem.ref]).toLocaleString('default', {
-                                            month: 'long',
-                                            year: 'numeric',
-                                            day: "numeric",
-                                            hour: "numeric",
-                                            minute: "numeric"
-                                        });
-                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat(theDate).concat('</td>');
-                                    }
-                                }
-                            }
-                        } else { //non search
+ //non search
                             if (aIndex == 0) bodyHtml = bodyHtml.concat('<tr class="prioRow">');
                             if (aItem.visible) {
                                 //edited
@@ -253,9 +225,18 @@ function formatTable() {
                                     }else if(aItem.ref == 'batchClaimTime') {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref].replace("|||"," - ")).concat('</td>'));
                                     }else if(aItem.ref == 'transactionPrice'){
-                                        var a = parseInt(item[aItem.ref]).toLocaleString();
+                                        var a = parseInt(item['inventoryPrice']);
+                                        var b = parseInt(item['transactionQuantity']);
+                                        a *= b;
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
-                                    }else {
+                                    }else if(aItem.ref == 'transactionDelivery'){
+                                        if (item[aItem.ref] == '0') {
+                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat('No Delivery').concat('</td>'));
+                                        }else{
+                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
+                                        }
+                                    }
+                                    else {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
                                     }
                                 }
@@ -263,10 +244,16 @@ function formatTable() {
                                     if (aItem.name == 'Options') {
                                         bodyHtml = bodyHtml.concat('<td class="aksepDenay ').concat(colorClass).concat('">').concat('<a onclick="'.concat('acceptFree').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class=" btnAccept btn" data-bs-toggle="modal">Accept</a> &nbsp;'))
                                             .concat('<a onclick="'.concat('denyTicket').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnDeny btn" data-bs-toggle="modal">Deny</a></ttd>'));
-                                    } else if (aItem.name == 'Edit') {
-                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
-                                    } else {
-                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    } else if (aItem.name == 'Edit Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(index).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-primary" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    } else if (aItem.name == 'Accept Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-success" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                        
+                                    }else if (aItem.name == 'Void Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btnDanger btn " data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    }
+                                    else {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-info" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
                                     }
         
                                     //to here
@@ -282,16 +269,12 @@ function formatTable() {
                                     bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat(theDate).concat('</td>');
                                 }
                             }
-                        }
+                        
                     }
 
                 });
                 
-            if (document.getElementById('searchText').value.length > 0) {
-                if (item[adminFieldList[document.getElementById('searchField').value].ref].toLowerCase().includes(document.getElementById('searchText').value.toLowerCase())) {
-                    bodyHtml = bodyHtml.concat('</tr>');
-                }
-            }
+            
         });
         document.getElementById('tableHead').innerHTML = headHtml;
         document.getElementById('tableBody').innerHTML = bodyHtml;
@@ -457,8 +440,175 @@ function saveTransaction(){
     xhr.send(JSON.stringify(data));
 }
 
+function cancelDelete() {
+    $('#deleteModal').modal('hide');
+    selectedBatch = null;
+}
 
+function deleteModal(batch) {
+    selectedBatch = batch;
+    console.log(batch);
+}
 
+function deleteItem() {
+    let xhr = new XMLHttpRequest();
+    xhr.open("DELETE", window.location.origin + "/transaction", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+    let data = {
+        details: {
+            id: selectedBatch, // Ensure selectedBatch is properly set before calling this function
+        }
+    };
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status == 200) {
+                $('#deleteModal').modal('hide');
+                swal({
+                    title: "Transaction Deleted",
+                    text: ":D",
+                    timer: 2000
+                  });
+                refreshTable();
+            } else if (xhr.status == 404) {
+                console.log("GAGFSADFDS");
+            }
+        }
+    };
+    xhr.send(JSON.stringify(data));
+}
+
+function editModal(batch) {
+    selectedBatch = batch;
+    document.getElementById('inNameEdit').value = batchData[selectedBatch].transactionCustomerName;
+    document.getElementById('inItemNameEdit').value = batchData[selectedBatch].inventoryBrand;
+    document.getElementById('inQuantityEdit').value = batchData[selectedBatch].transactionQuantity;
+    document.getElementById('inSINEdit').value = batchData[selectedBatch].transactionSalesInvoiceNumber;
+    var delivery = batchData[selectedBatch].transactionDelivery;
+    if (delivery > 0) {
+        document.getElementById('editModalSalesDelivery').style.display = "grid";
+        document.getElementById('inDeliveryAddressEdit').value = batchData[selectedBatch].transactionDeliveryAddress;
+        document.getElementById('inDeliveryFee').value = batchData[selectedBatch].transactionDelivery;
+        isDelivery = 1;
+    }else {
+        document.getElementById('editModalSalesDelivery').style.display = "none";
+        document.getElementById('inDeliveryAddressEdit').value = '';
+        document.getElementById('inDeliveryFee').value = '';
+        isDelivery = 0;
+    }
+}
+
+function saveEdit() {
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("PUT", window.location.origin + "/transaction", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+            console.log(xhr);
+            if (xhr.status == 200) {
+                $('#editModal').modal('hide');
+                swal({
+                    title: "Transaction Edited",
+                    text: ":D",
+                    timer: 2000
+                  });
+                refreshTable();
+            } else {
+
+            }
+        }
+    };
+    var data = {
+        details: {
+            quantity: document.getElementById('inQuantityEdit').value,
+            address: document.getElementById('inDeliveryAddressEdit').value,
+            shippingFee: document.getElementById('inDeliveryFee').value,
+            salesInvoiceNumber: document.getElementById('inSINEdit').value,
+            id: batchData[selectedBatch].transactionId,
+            isDelivery: isDelivery,
+        }
+    };
+    xhr.send(JSON.stringify(data));
+}
+
+function searchItem(){
+    searchInput = document.getElementById('searchText').value.toString();
+    searchInput2 = document.getElementById('searchField').value;
+    if(searchInput == ''){
+        refreshTable();
+    }else{
+        if (searchInput2 == '0') {
+            searchInput2 = 'customerName';
+            searchField = 'Customer Name'
+            searchQuery();
+        }else if (searchInput2 == '1') {
+            searchInput2 = 'brand';
+            searchField = 'Item Name'
+            searchQuery();
+        }else if (searchInput2 == '2') {
+            searchInput2 = 'type';
+            searchField = 'Item Type'
+            searchQuery();
+        }else if (searchInput2 == '3') {
+            searchInput2 = 'quantity';
+            searchField = 'Quantity'
+            searchQuery();
+        }else if (searchInput2 == '7') {
+            searchInput2 = 'SIN';
+            searchField = 'Sales Invoice Number'
+            searchQuery();
+        }else{
+            refreshTable();
+        }
+    }
+    console.log(searchInput2);
+    console.log(searchInput);
+}
+
+function searchQuery() {
+    let xhr = new XMLHttpRequest();
+    xhr.open(
+        "GET",
+        window.location.origin +
+            "/transactionList?searchQuery=" +
+            encodeURIComponent(searchInput) +
+            "&searchTarget=" +
+            encodeURIComponent(searchInput2)+"&page=1",
+        true // Ensure the request is asynchronous
+    );
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    // Parse the response and update the table
+                    batchData = JSON.parse(xhr.responseText);
+                    console.log("Search Results:", batchData);
+
+                    formatTable();
+                } catch (error) {
+                    console.error("Error parsing response:", error);
+                }
+            } else if (xhr.status === 404) {
+                console.log("No results found for the search query.");
+                batchData = []; // Clear the table if no results are found
+                formatTable();
+            } else {
+                console.error("Failed to fetch search results. Status:", xhr.status);
+            }
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error("An error occurred during the request.");
+    };
+
+    xhr.send();
+}
 
 function goSales() {
     window.location.replace("/sales");

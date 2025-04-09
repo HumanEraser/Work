@@ -1,5 +1,3 @@
-
-
 var btnImg = false;
 var a = '';
 var textDark = '';
@@ -31,6 +29,8 @@ var a;
 var searchInput = '';
 var searchInput2;
 var searchField = '';
+var currentIndex;
+var detailsCurrentIndex
 
 function init() {
     adminFieldList = [{
@@ -242,9 +242,9 @@ function formatTable() {
                     else setHtml = setHtml.concat('<td class="text-center"><button onclick="setFieldSetting(').concat(aIndex).concat(',0)" class="btn btn-danger">Invisible</button></td>');
                     setHtml = setHtml.concat('<td class="text-center"><button id="btnUD1" onclick="setFieldSetting(').concat(aIndex).concat(',-1)" class="btn btn-primary me-1">Move up</button><button id="btnUD2" onclick="setFieldSetting(').concat(aIndex).concat(',1)" class="btn btn-primary ">Move Down</button></td></tr>')
                     if (aItem.visible && (aItem.type == 'text' || aItem.type == 'date')) {
-                        if(aItem.name == searchField){
-                        searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('" Selected>'.concat(aItem.name).concat('</option>'));
-                        }else{
+                        if (aItem.name == searchField) {
+                            searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('" Selected>'.concat(aItem.name).concat('</option>'));
+                        } else {
                             searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('">'.concat(aItem.name).concat('</option>'));
                         }
                         if (savedSelection == aIndex) dontChange = true;
@@ -268,8 +268,8 @@ function formatTable() {
                         bodyHtml = bodyHtml.concat('<td class="lowQuanty text-center" name="critikal" id="quantity').concat(index).concat('">').concat(batchData[index].details[i].quantity).concat('</td>');
                         bodyHtml = bodyHtml.concat('<td class="ext-center"id="supplier').concat(index).concat('">').concat(batchData[index].details[i].supplierName).concat('</td>');
 
-                        bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="editModal(').concat(index).concat(')" class="btn btn-primary">Edit</button></td>');
-                        bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="deleteModal(').concat(index).concat(')" class="btn btn-danger">Delete</button></td></tr>');
+                        bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="editModal(').concat(batchData[index].itemId +','+ i + ',' + index).concat(')" class="btn btn-primary">Edit</button></td>');
+                        bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="deleteModal(').concat(batchData[index].itemId +','+ i + ',' + index).concat(')" class="btn btn-danger">Delete</button></td></tr>');
                         document.getElementById('tableHead').innerHTML = headHtml;
                         document.getElementById('tableBody').innerHTML = bodyHtml;
                         document.getElementById('searchField').innerHTML = searchHtml;
@@ -293,8 +293,8 @@ function formatTable() {
                     }
                     console.log(i);
                     bodyHtml = bodyHtml.concat('<td class="ext-center"id="supplier').concat(index).concat('">').concat(batchData[index].details[i].supplierName).concat('</td>');
-                    bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="editModal(').concat(batchData[index].itemId).concat(')" class="btn btn-primary">Edit</button></td>');
-                    bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="deleteModal(').concat(batchData[index].itemId).concat(')" class="btn btn-danger">Delete</button></td></tr>');
+                    bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="editModal(').concat(batchData[index].itemId +','+ i + ',' + index).concat(')" class="btn btn-primary">Edit</button></td>');
+                    bodyHtml = bodyHtml.concat('<td class="text-center"><button onclick="deleteModal(').concat(batchData[index].itemId +','+ i + ',' + index).concat(')" class="btn btn-danger">Delete</button></td></tr>');
                     document.getElementById('tableHead').innerHTML = headHtml;
                     document.getElementById('tableBody').innerHTML = bodyHtml;
                     document.getElementById('searchField').innerHTML = searchHtml;
@@ -313,24 +313,24 @@ function saveAdd() {
     var inPrice = inPrice = document.getElementById('inPPI').value;;
     var inQuantity = inQuantity = document.getElementById('inQuantity').value;;
     var inSupply = inSupply = document.getElementById('inSupply').value;;
-    if(document.getElementById('inProductType202').checked){
+    if (document.getElementById('inProductType202').checked) {
         inType = '202';
-    }else if(document.getElementById('inProductType304').checked){
+    } else if (document.getElementById('inProductType304').checked) {
         inType = '304';
-    }else{
+    } else {
         alert("Please select a type.");
     }
-    if(inProduct == ''){
+    if (inProduct == '') {
         alert("Please enter a product name.");
-    }else if(inType == ''){
+    } else if (inType == '') {
         alert("Please select a type.");
-    }else if(inPrice == ''){
+    } else if (inPrice == '') {
         alert("Please enter a price.");
-    }else if(inQuantity == ''){
+    } else if (inQuantity == '') {
         alert("Please enter a quantity.");
-    }else if(inSupply == ''){
+    } else if (inSupply == '') {
         alert("Please enter a supplier name.");
-    }else{
+    } else {
         inProduct = document.getElementById('inProductId').value;
         inPrice = document.getElementById('inPPI').value;
         inQuantity = document.getElementById('inQuantity').value;
@@ -349,7 +349,7 @@ function saveAdd() {
                     swal("Item Added Successfully", "Your Item is now in the inventory", "success")
                     refreshTable();
                 } else {
-    
+
                 }
             }
         };
@@ -381,29 +381,23 @@ function cancelAdd() {
     $('.modal-backdrop').remove();
 }
 
-function editModal(inventoryId) {
+function editModal(inventoryId, index, detailsIndex) {
     selectedBatch = inventoryId;
+    currentIndex = index;
+    detailsCurrentIndex = detailsIndex;
+    console.log(selectedBatch);
+    console.log(currentIndex);
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
-    var price202 = '';
-    var price304 = '';
-    var quantity202 = '';
-    var quantity304 = '';
-    batchLength = batchData[selectedBatch].details.length;
-    for (var i = 0; i < batchData[selectedBatch].details.length; i++) {
-        if (batchData[selectedBatch].details[i].type == '202') {
-            price202 = batchData[selectedBatch].details[i].price;
-            quantity202 = batchData[selectedBatch].details[i].quantity;
-        } else if (batchData[selectedBatch].details[i].type == '304') {
-            price304 = batchData[selectedBatch].details[i].price;
-            quantity304 = batchData[selectedBatch].details[i].quantity;
-        }
+    document.getElementById('inProductIdEdit').value = batchData[detailsIndex].name;
+    document.getElementById('inPPIEdit').value = batchData[detailsIndex].details[currentIndex].price;
+    document.getElementById('inQuantityEdit').value = batchData[detailsIndex].details[currentIndex].quantity;
+    document.getElementById('inSupplyEdit').value = batchData[detailsIndex].details[currentIndex].supplierName;
+    if(batchData[detailsIndex].details[currentIndex].type == '202') {
+        document.getElementById('inProductType202Edit').checked = true;
+    }else if(batchData[detailsIndex].details[currentIndex].type == '304') {   
+        document.getElementById('inProductType304Edit').checked = true;
     }
-    document.getElementById('inProductIdNew').value = batchData[selectedBatch].name;
-    document.getElementById('inPPINew').value = price202;
-    document.getElementById('inPPI2New').value = price304;
-    document.getElementById('inQuanti202New').value = quantity202;
-    document.getElementById('inQuanti304New').value = quantity304;
 }
 
 function critical() {
@@ -427,46 +421,71 @@ function critical() {
 }
 
 function saveEdit() {
-    var inProduct = document.getElementById('inProductIdNew').value;
-    var inPrice = document.getElementById('inPPINew').value;
-    var inPrice2 = document.getElementById('inPPI2New').value;
-    var quanti202 = document.getElementById('inQuanti202New').value;
-    var quanti304 = document.getElementById('inQuanti304New').value;
+    var inProduct = document.getElementById('inProductIdEdit').value;
+    var inType = '';
+    var inPrice = document.getElementById('inPPIEdit').value;
+    var inQuantity = document.getElementById('inQuantityEdit').value;
+    var inSupply = document.getElementById('inSupplyEdit').value;
 
-    let xhr = new XMLHttpRequest();
-    xhr.open("PUT", window.location.origin + "/inventory");
-    xhr.setRequestHeader("Accept", "/");
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            console.log(xhr.status);
-            console.log(xhr.responseText);
-            console.log(xhr);
-            if (xhr.status == 200) {
-                $('#editModal').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-                refreshTable();
-            } else {
+    if (document.getElementById('inProductType202Edit').checked) {
+        inType = '202';
+    } else if (document.getElementById('inProductType304Edit').checked) {
+        inType = '304';
+    }
+    if (inProduct == '') {
+        alert("Please enter a product name.");
+    } else if (inType == '') {
+        alert("Please select a type.");
+    } else if (inPrice == '') {
+        alert("Please enter a price.");
+    } else if (inQuantity == '') {
+        alert("Please enter a quantity.");
+    } else if (inSupply == '') {
+        alert("Please enter a supplier name.");
+    } else {
+        let xhr = new XMLHttpRequest();
+        xhr.open("PUT", window.location.origin + "/inventory");
+        xhr.setRequestHeader("Accept", "/");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                console.log(xhr);
+                if (xhr.status == 200) {
+                    $('#editModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    refreshTable();
+                } else {
 
+                }
             }
-        }
-    };
-    data = {
-        details: {
-            brand: inProduct,
-            price202: inPrice,
-            price304: inPrice2,
-            quantity202: quanti202,
-            quantity304: quanti304,
-            id: selectedBatch
-        }
-    };
-    console.log(data);
-    xhr.send(JSON.stringify(data));
+        };
+        data = {
+            details: {
+                brand: inProduct,
+                Price: inPrice,
+                Type: inType,
+                quantity: inQuantity,
+                supply: inSupply,
+                id: selectedBatch
+            }
+        };
+        console.log(data);
+        xhr.send(JSON.stringify(data));
+    }
 }
 
 function cancelEdit() {
+    document.getElementById('inProductIdEdit').value = '';
+    document.getElementById('inPPIEdit').value = '';
+    document.getElementById('inQuantityEdit').value = '';
+    document.getElementById('inSupplyEdit').value = '';
+    document.getElementById('inProductType202Edit').checked = false;
+    document.getElementById('inProductType304Edit').checked = false;
+
+
     $('#editModal').modal('hide');
     $('body').removeClass('modal-open');
     $('.modal-backdrop').remove();
@@ -495,7 +514,7 @@ function confirmDelete() {
                     title: "You deleted the item.",
                     text: "I will close in 2 seconds.",
                     timer: 2000
-                  });
+                });
             } else {
                 alert("Failed to delete the item. Please try again.");
             }
@@ -511,33 +530,33 @@ function confirmDelete() {
     xhr.send(JSON.stringify(data));
 }
 
-function searchItem(){
+function searchItem() {
     searchInput = document.getElementById('searchText').value;
     searchInput2 = document.getElementById('searchField').value;
-    if(searchInput == ''){
+    if (searchInput == '') {
         refreshTable();
-    }else{
-        if(searchInput2 == '0'){
+    } else {
+        if (searchInput2 == '0') {
             searchInput2 = 'brand';
             searchField = 'Item Name';
             searchQuery();
-        }else if(searchInput2 == '1'){
+        } else if (searchInput2 == '1') {
             searchInput2 = 'type';
-            searchField = 'Type';  
+            searchField = 'Type';
             searchQuery();
-        }else if(searchInput2 == '2'){
+        } else if (searchInput2 == '2') {
             searchInput2 = 'price';
             searchField = 'Price';
             searchQuery();
-        }else if(searchInput2 == '3'){
+        } else if (searchInput2 == '3') {
             searchInput2 = 'quantity';
             searchField = 'Quantity';
             searchQuery();
-        }else if(searchInput2 == '4'){
+        } else if (searchInput2 == '4') {
             searchInput2 = 'supplier';
             searchField = 'Supplier';
             searchQuery();
-        }else{
+        } else {
             refreshTable();
         }
     }
@@ -548,10 +567,10 @@ function searchQuery() {
     xhr.open(
         "GET",
         window.location.origin +
-            "/inventoryList?searchQuery=" +
-            encodeURIComponent(searchInput) +
-            "&searchTarget=" +
-            encodeURIComponent(searchInput2),
+        "/inventoryList?searchQuery=" +
+        encodeURIComponent(searchInput) +
+        "&searchTarget=" +
+        encodeURIComponent(searchInput2),
         true // Ensure the request is asynchronous
     );
 

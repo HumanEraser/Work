@@ -59,9 +59,15 @@ function init() {
             visible: "true"
         },
         {
-            name: "Delivery",
+            name: "Delivery Fee",
             type: "text",
             ref: "transactionDelivery",
+            visible: "true"
+        },
+        {
+            name: "Delivery Address",
+            type: "text",
+            ref: "transactionDeliveryAddress",
             visible: "true"
         },
         {
@@ -150,8 +156,18 @@ function formatTable() {
                         else setHtml = setHtml.concat('<td class="text-center"><button onclick="setFieldSetting(').concat(aIndex).concat(',0)" class="btn btn-danger">Invisible</button></td>');
                         setHtml = setHtml.concat('<td class="text-center"><button id="btnUD1" onclick="setFieldSetting(').concat(aIndex).concat(',-1)" class="btn btn-primary me-1">Move up</button><button id="btnUD2" onclick="setFieldSetting(').concat(aIndex).concat(',1)" class="btn btn-primary ">Move Down</button></td></tr>')
                         if (aItem.visible && (aItem.type == 'text' || aItem.type == 'date')) {
-                            searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('">'.concat(aItem.name).concat('</option>'));
-                            if (savedSelection == aIndex) dontChange = true;
+                            if (aItem.ref == 'transactionPrice') {
+                            }else if (aItem.ref == 'transactionDelivery') {
+                            }else if (aItem.ref == 'transactionDate') {
+                            }else{
+                                if(aItem.name == searchField){
+                                    
+                                    searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('" Selected>'.concat(aItem.name).concat('</option>'));
+                                    }else{
+                                        searchHtml = searchHtml.concat('<option value="').concat(aIndex.toString()).concat('">'.concat(aItem.name).concat('</option>'));
+                                    }
+                            }
+                            
                         }
                     }
                     if(batchData[index].transactionAccepted == 1){
@@ -178,22 +194,35 @@ function formatTable() {
                                         }else if(aItem.ref == 'transactionPrice'){
                                             var a = item[aItem.ref].toLocaleString();
                                             bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
-                                        }else {
+                                        }else if(aItem.ref == 'transactionDeliveryAddress'){
+                                            if (item[aItem.ref] == null) {
+                                                bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat('No Address').concat('</td>'));
+                                            }else{
+                                                bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
+                                            }
+                                        }
+                                        else {
                                             bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
                                         }
                                     }
                                     if (aItem.type == 'button') {
-                                        if (aItem.name == 'Options') {
-                                            bodyHtml = bodyHtml.concat('<td class="aksepDenay ').concat(colorClass).concat('">').concat('<a onclick="'.concat('acceptFree').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class=" btnAccept btn" data-bs-toggle="modal">Accept</a> &nbsp;'))
-                                                .concat('<a onclick="'.concat('denyTicket').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnDeny btn" data-bs-toggle="modal">Deny</a></ttd>'));
-                                        } else if (aItem.name == 'Edit') {
-                                            bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
-                                        } else {
-                                            bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
-                                        }
-        
-                                        //to here
+                                    if (aItem.name == 'Options') {
+                                        bodyHtml = bodyHtml.concat('<td class="aksepDenay ').concat(colorClass).concat('">').concat('<a onclick="'.concat('acceptFree').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class=" btnAccept btn" data-bs-toggle="modal">Accept</a> &nbsp;'))
+                                            .concat('<a onclick="'.concat('denyTicket').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnDeny btn" data-bs-toggle="modal">Deny</a></ttd>'));
+                                    } else if (aItem.name == 'Edit Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(index).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-primary" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    } else if (aItem.name == 'Accept Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-success" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                        
+                                    }else if (aItem.name == 'Void Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btnDanger btn " data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
                                     }
+                                    else {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-info" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    }
+        
+                                    //to here
+                                }
                                     if (aItem.type == 'date') {
                                         var theDate = new Date(item[aItem.ref]).toLocaleString('default', {
                                             month: 'long',
@@ -225,11 +254,24 @@ function formatTable() {
                                     }else if(aItem.ref == 'batchClaimTime') {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref].replace("|||"," - ")).concat('</td>'));
                                     }else if(aItem.ref == 'transactionPrice'){
-                                        console.log(item[aItem.ref]);
-                                        var a = parseInt(item[aItem.ref]).toLocaleString();
-                                        console.log(a);
+                                        var a = parseInt(item['inventoryPrice']);
+                                        var b = parseInt(item['transactionQuantity']);
+                                        a *= b;
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(a).concat('</td>'));
-                                    }else {
+                                    }else if(aItem.ref == 'transactionDelivery'){
+                                        if (item[aItem.ref] == '0') {
+                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat('No Delivery').concat('</td>'));
+                                        }else{
+                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
+                                        }
+                                    }else if(aItem.ref == 'transactionDeliveryAddress'){
+                                        if (item[aItem.ref] == null) {
+                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat('No Address').concat('</td>'));
+                                        }else{
+                                            bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
+                                        }
+                                    }
+                                    else {
                                         bodyHtml = bodyHtml.concat('<td class="'.concat(colorClass).concat('">').concat(item[aItem.ref]).concat('</td>'));
                                     }
                                 }
@@ -237,10 +279,16 @@ function formatTable() {
                                     if (aItem.name == 'Options') {
                                         bodyHtml = bodyHtml.concat('<td class="aksepDenay ').concat(colorClass).concat('">').concat('<a onclick="'.concat('acceptFree').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class=" btnAccept btn" data-bs-toggle="modal">Accept</a> &nbsp;'))
                                             .concat('<a onclick="'.concat('denyTicket').concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnDeny btn" data-bs-toggle="modal">Deny</a></ttd>'));
-                                    } else if (aItem.name == 'Edit') {
-                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
-                                    } else {
-                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    } else if (aItem.name == 'Edit Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(index).concat(',false)"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-primary" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    } else if (aItem.name == 'Accept Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-success" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                        
+                                    }else if (aItem.name == 'Void Transaction') {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btnDanger btn " data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
+                                    }
+                                    else {
+                                        bodyHtml = bodyHtml.concat('<td class="').concat(colorClass).concat('">').concat('<a onclick="'.concat(aItem.method).concat('(').concat(item[aItem.args]).concat(')"').concat(' href="').concat(aItem.other).concat('" role="button" class="btnOther btn btn-info" data-bs-toggle="modal">').concat(aItem.display).concat('</a></ttd>'));
                                     }
         
                                     //to here
@@ -258,8 +306,9 @@ function formatTable() {
                             }
                         }
                     }
+
                 });
-   
+                
             if (document.getElementById('searchText').value.length > 0) {
                 if (item[adminFieldList[document.getElementById('searchField').value].ref].toLowerCase().includes(document.getElementById('searchText').value.toLowerCase())) {
                     bodyHtml = bodyHtml.concat('</tr>');
@@ -272,6 +321,82 @@ function formatTable() {
         if (dontChange) document.getElementById('searchField').value = savedSelection;
     }
 }
+
+function searchItem(){
+    searchInput = document.getElementById('searchText').value.toString();
+    searchInput2 = document.getElementById('searchField').value;
+    if(searchInput == ''){
+        refreshTable();
+    }else{
+        if (searchInput2 == '0') {
+            searchInput2 = 'customerName';
+            searchField = 'Customer Name'
+            searchQuery();
+        }else if (searchInput2 == '1') {
+            searchInput2 = 'brand';
+            searchField = 'Item Name'
+            searchQuery();
+        }else if (searchInput2 == '2') {
+            searchInput2 = 'type';
+            searchField = 'Item Type'
+            searchQuery();
+        }else if (searchInput2 == '3') {
+            searchInput2 = 'quantity';
+            searchField = 'Quantity'
+            searchQuery();
+        }else if (searchInput2 == '7') {
+            searchInput2 = 'SIN';
+            searchField = 'Sales Invoice Number'
+            searchQuery();
+        }else{
+            refreshTable();
+        }
+    }
+    console.log(searchInput2);
+    console.log(searchInput);
+}
+
+function searchQuery() {
+    let xhr = new XMLHttpRequest();
+    xhr.open(
+        "GET",
+        window.location.origin +
+            "/transactionList?searchQuery=" +
+            encodeURIComponent(searchInput) +
+            "&searchTarget=" +
+            encodeURIComponent(searchInput2)+"&page=1",
+        true // Ensure the request is asynchronous
+    );
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    // Parse the response and update the table
+                    batchData = JSON.parse(xhr.responseText);
+                    console.log("Search Results:", batchData);
+
+                    formatTable();
+                } catch (error) {
+                    console.error("Error parsing response:", error);
+                }
+            } else if (xhr.status === 404) {
+                console.log("No results found for the search query.");
+                batchData = []; // Clear the table if no results are found
+                formatTable();
+            } else {
+                console.error("Failed to fetch search results. Status:", xhr.status);
+            }
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error("An error occurred during the request.");
+    };
+
+    xhr.send();
+}
+
 
 function checkDetails(batch) {
     let xhr = new XMLHttpRequest();

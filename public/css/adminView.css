@@ -34,6 +34,7 @@ label{
 
 .tableCont{
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin: 0%;
@@ -79,9 +80,32 @@ element{
 
 .conteyner{
     margin: 0%;
+    margin-left: 2%;
+    margin-right: 2%;
     display: grid;
     grid-template-columns: 60% 40%;
     grid-gap: 1%;
     padding: 0%;
     height: 200%;
+}
+
+.editModalSales{
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-gap: 5%;
+    margin-bottom: 10%;
+}
+
+.btnDanger{
+    background-color: rgb(163, 34, 255) !important;
+    color: white !important;
+}
+
+.btnDanger:hover{
+    background-color: rgb(145, 29, 228) !important;
+    color: white !important;
+}
+
+.topTableText{
+    font-size: 0.9rem;
 }

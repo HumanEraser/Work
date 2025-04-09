@@ -122,10 +122,10 @@ function addItem(){
             quantity304 = batchData[selectedBatch].details[i].quantity;
         }
     }
-    if(quantity202 > 0){
+    if(batchData[selectedBatch].details[0].type == '202'){
         tableBody += '<tr><td>202</td><td>'+ quantity202 + '</td><td>'+ price202 +'</td><td><input type="radio" id="202id" name="fav_language" value="202"></td></tr>';
     }
-    if(quantity304 > 0){
+    if(batchData[selectedBatch].details[1].type == '304'){
         tableBody += '<tr><td>304</td><td>'+ quantity304 + '</td><td>'+ price304 +'</td><td><input type="radio" id="304id" name="fav_language" value="304"></td></tr>';
     }
     document.getElementById('tableBody').innerHTML = tableBody;
@@ -136,47 +136,79 @@ function saveAdd() {
     var quantity = document.getElementById('orderCount').value;
     var type = '';
     var price = '';
+    var SId = '';
     if(batchLength > 1){
         if(document.getElementById('202id').checked){
             type = '202';
             price = batchData[selectedBatch].details[0].price;
+            SId = batchData[selectedBatch].details[0].SId;
         } else if(document.getElementById('304id').checked){
             type = '304';
             price = batchData[selectedBatch].details[1].price;
+            SId = batchData[selectedBatch].details[1].SId;
         }
     }else{
         type = batchData[selectedBatch].details[0].type;
         price = batchData[selectedBatch].details[0].price;
+        SId = batchData[selectedBatch].details[0].SId;
     }
     if (quantity == 0) {
         alert('Please enter a quantity');
         return;
     } else {
-        var details = {
-            itemId: batchData[selectedBatch].itemId,
-            itemName: batchData[selectedBatch].name,
-            quantity: quantity,
-            type: type,
-            price: price
-        };
-        console.log(details);
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", window.location.origin + "/saveOrder");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status == 200) {
-                    alert('Order added');
-                    $('#addModal').modal('hide');
-                    location.reload();
-                } else if (xhr.status == 404) {
-                    console.log("Order not found");
-                } else {
-                    console.log("Error: " + xhr.status);
+        console.log(batchData[selectedBatch].details[0].quantity);
+        console.log(quantity);
+        if(quantity > batchData[selectedBatch].details[0].quantity){
+            alert('Quantity exceeds available stock');
+            return;
+        }else{
+            var details = {
+                itemId: SId,
+                itemName: batchData[selectedBatch].name,
+                quantity: quantity,
+                type: type,
+                price: price
+            };
+            console.log(details);
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", window.location.origin + "/saveOrder");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status == 200) {
+                        alert('Order added');
+                        $('#addModal').modal('hide');
+                        location.reload();
+                    } else if (xhr.status == 404) {
+                        console.log("Order not found");
+                    } else {
+                        console.log("Error: " + xhr.status);
+                    }
                 }
-            }
-        };
-        xhr.send(JSON.stringify({ details: details }));
+            };
+            xhr.send(JSON.stringify({ details: details }));
+        }
+    }
+}
+
+function cancelAdd() {
+    $('#addModal').modal('hide');
+    document.getElementById('orderCount').value = '0';
+}
+
+function checkStock(){
+    if(document.getElementById('202id').checked){
+        if(document.getElementById('orderCount').value > batchData[selectedBatch].details[0].quantity){
+            document.getElementById('orderCount').value = batchData[selectedBatch].details[0].quantity;
+            alert('Quantity exceeds available stock');
+            return;
+        }
+    }else if(document.getElementById('304id').checked){
+        if(document.getElementById('orderCount').value > batchData[selectedBatch].details[1].quantity){
+            document.getElementById('orderCount').value = batchData[selectedBatch].details[1].quantity;
+            alert('Quantity exceeds available stock');
+            return;
+        }
     }
 }
 
@@ -211,25 +243,33 @@ function checkOutBtn(){
     var pImg = '';
     var delfee = '';
     var deladd = '';
-    var discount = '';
+    var discount = '0';
     var SIN = '';
 
     if(document.getElementById('proofImage').value == ''){
         alert('Please upload a proof of payment');
         return;
-    }else{
+    }else if(document.getElementById('dp').value == '' && document.getElementById('deliver').checked){
+        alert('Please enter a down payment amount');
+        return;
+    }
+    else{
         csName = document.getElementById('customerName').value;
         delfee = document.getElementById('sf').value;
         deladd = document.getElementById('address').value;
         discount = document.getElementById('discount').value;
+        if(discount == ''){
+            discount = '0';
+        }
         SIN = document.getElementById('SIN').value;
         var details = {
             customername: csName,
             deliveryFee: delfee,
-            deliveryAddress: deladd,
+            deliveryaddress: deladd,
             discount: discount,
             salesInvoiceNumber: SIN,
         };
+        console.log(details);
         let xhr = new XMLHttpRequest();
         let photo = document.getElementById("proofImage").files[0];
         let formData = new FormData();

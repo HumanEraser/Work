@@ -71,6 +71,18 @@ function init() {
         visible: true
     }
 ];
+ priceJanuary = 0;
+ priceFeburary = 0;
+ priceMarch = 0;
+ priceApril = 0;
+ priceMay = 0;
+ priceJune = 0;
+ priceJuly = 0;
+ priceAugust = 0;
+ priceSeptember = 0;
+ priceOctober = 0;
+ priceNovember = 0;
+ priceDecember = 0;
 refreshTable();
 prioBatch = true;
     const date = new Date();
@@ -84,8 +96,8 @@ function getSalesData() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status == 200) {
-                batchData = JSON.parse(xhr.responseText);
-                console.log(batchData);
+                batchData2 = JSON.parse(xhr.responseText);
+                console.log(batchData2);
                 formatDate();
             } else if (xhr.status == 404) {
                 console.log("GAGFSADFDS");
@@ -304,34 +316,37 @@ function formatTable() {
 
 function formatDate() {
     theDate = [];
-    batchData.forEach(function (item, index, arr) {
-        if (new Date(item.transactionDate).getFullYear() == currentDate) {
-            if (new Date(item.transactionDate).getMonth().toString() == "0") {
-                priceJanuary += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "1"){
-                priceFeburary += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "2"){
-                priceMarch += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "3"){
-                priceApril += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "4"){
-                priceMay += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "5"){
-                priceJune += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "6"){
-                priceJuly += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "7"){
-                priceAugust += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "8"){
-                priceSeptember += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "9"){
-                priceOctober += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "10"){
-                priceNovember += parseFloat(item.transactionPrice);
-            }else if(new Date(item.transactionDate).getMonth().toString() == "11"){
-                priceDecember += parseFloat(item.transactionPrice);
+    batchData2.forEach(function (item, index, arr) {
+        if(item.transactionAccepted == 1){
+            if (new Date(item.transactionDate).getFullYear() == currentDate) {
+                if (new Date(item.transactionDate).getMonth().toString() == "0") {
+                    priceJanuary += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "1"){
+                    priceFeburary += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "2"){
+                    priceMarch += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "3"){
+                    priceApril += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "4"){
+                    priceMay += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "5"){
+                    priceJune += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "6"){
+                    priceJuly += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "7"){
+                    priceAugust += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "8"){
+                    priceSeptember += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "9"){
+                    priceOctober += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "10"){
+                    priceNovember += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }else if(new Date(item.transactionDate).getMonth().toString() == "11"){
+                    priceDecember += parseFloat(item.inventoryPrice) * parseFloat(item.transactionQuantity);
+                }
             }
         }
+
     });
     console.log(priceJanuary);
     setChart();

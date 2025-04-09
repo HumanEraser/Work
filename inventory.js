@@ -141,21 +141,43 @@ router.get('/transactionList', async function (req, res) {
             try {
                 var lowEnd = ((req.query.page - 1) * 10) + 1;
                 var highEnd = req.query.page * 10;
+                console.log("query "+req.query.searchQuery);
+                console.log("targer "+req.query.searchTarget);
                 if (typeof req.query.searchTarget != "undefined" || typeof req.query.searchQuery != "undefined") {
                     var doContinue = true;
-                    var sql = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY transactionDate desc ) AS RowNum FROM tb_transaction, tb_inventory where transactionItem = inventoryId and ( {{target}} LIKE ? OR {{target}} LIKE ? OR {{target}} LIKE ? ) ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum";
-                    if (req.query.searchTarget == "brand") {
+                    //var sql = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY transactionDate desc ) AS RowNum FROM tb_transaction, tb_inventory where transactionItem = inventoryId and ( {{target}} LIKE ? OR {{target}} LIKE ? OR {{target}} LIKE ? ) ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum";
+                    var sql = `
+                        SELECT tb_transaction.*, tb_inventory.inventoryBrand, tb_inventory.inventoryType
+                        FROM tb_transaction
+                        JOIN tb_inventory ON tb_transaction.transactionItem = tb_inventory.inventoryId
+                        WHERE {{target}} LIKE ? OR {{target}} LIKE ? OR {{target}} LIKE ?
+                        ORDER BY transactionDate DESC
+                        
+                    `;
+                    if (req.query.searchTarget == "customerName") {
+                        console.log("GET CUSTOMER NAME");
+                        sql = sql.replaceAll("{{target}}", "transactionCustomerName");
+                    } else if (req.query.searchTarget == "brand") {
+                        console.log("GET BRAND");
                         sql = sql.replaceAll("{{target}}", "inventoryBrand");
-                    } else if (req.query.searchTarget == "category") {
-                        sql = sql.replaceAll("{{target}}", "inventoryCategory");
-                    } else {
+                    }else if (req.query.searchTarget == "type") {
+                        console.log("GET TYPE");
+                        sql = sql.replaceAll("{{target}}", "inventoryType");
+                    }else if (req.query.searchTarget == "quantity") {
+                        console.log("GET QUANTITY");
+                        sql = sql.replaceAll("{{target}}", "transactionQuantity");
+                    }else if (req.query.searchTarget == "SIN") {
+                        console.log("GET SIN");
+                        sql = sql.replaceAll("{{target}}", "transactionSalesInvoiceNumber");
+                    }else {
                         doContinue = false;
                     }
+                    
                     if (doContinue) {
                         var [results, fields] = await db.query(
-                            sql,
-                            ['%' + req.query.searchQuery, req.query.searchQuery + '%', '%' + req.query.searchQuery + '%', lowEnd, highEnd]
+                            sql,['%' + req.query.searchQuery, req.query.searchQuery + '%', '%' + req.query.searchQuery + '%']
                         );
+                        console.log("Final SQL Query:", results);
                         db.end();
                         res.status(200).send(results);
                     } else {
@@ -163,8 +185,7 @@ router.get('/transactionList', async function (req, res) {
                         res.status(404).send();
                     }
                 } else {
-                    var [results, fields] = await db.query(
-                        "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY transactionDate desc ) AS RowNum FROM tb_transaction, tb_inventory where transactionItem = inventoryId ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
+                    var [results, fields] = await db.query("SELECT * FROM ( SELECT *, ROW_NUMBER() OVER ( ORDER BY transactionDate desc ) AS RowNum FROM tb_transaction, tb_inventory where transactionItem = inventoryId ) AS RowConstrainedResult WHERE RowNum >= ? AND RowNum <= ? ORDER BY RowNum",
                         [lowEnd, highEnd]
                     );
                     db.end();
@@ -293,10 +314,18 @@ router.put('/transaction', async function (req, res) {
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
             try {
-                await db.query(
-                    "UPDATE tb_transaction SET transactionItem = ?, transactionQuantity = ?, transactionPrice = ?, transactionDiscount = ?, transactionShippingFee = ?, transactionDelivaryStatus = ?, transactionPaymentMethod = ? WHERE transactionId = ?",
-                    [details.itemId, details.quantity, details.price, details.discount, details.shippingFee, details.status, details.payment, details.id]
-                );
+                if(details.isDelivery == 1){
+                    await db.query(
+                        "UPDATE tb_transaction SET  transactionQuantity = ?, transactionDeliveryAddress  = ?, transactionDelivery = ?, transactionSalesInvoiceNumber = ? WHERE transactionId = ?",
+                        [ details.quantity, details.address, details.shippingFee, details.salesInvoiceNumber, details.id]
+                    );
+                }else{
+                    await db.query(
+                        "UPDATE tb_transaction SET  transactionQuantity = ?, transactionSalesInvoiceNumber = ? WHERE transactionId = ?",
+                        [ details.quantity, details.salesInvoiceNumber, details.id]
+                    );
+                }
+                
                 db.end();
                 res.status(200).send();
             } catch (err) {
@@ -372,7 +401,20 @@ router.get('/inventoryList', async function (req, res) {
                 //var highEnd = req.query.page * 10;
                 if (typeof req.query.searchTarget != "undefined" || typeof req.query.searchQuery != "undefined") {
                     var doContinue = true;
-                    var sql = "SELECT * FROM tb_inventory WHERE {{target}} LIKE ? or {{target}} LIKE ? or {{target}} LIKE ?";
+                    var sql = `
+    SELECT 
+        tb_inventory.inventoryId,
+        tb_inventory.inventoryBrand,
+        tb_inventory.inventoryType,
+        tb_inventory.inventoryPrice,
+        tb_inventory.inventorySupplierName,
+        tb_inventory.inventorySId,
+        (tb_inventory.inventoryQuantity - IFNULL(SUM(tb_transaction.transactionQuantity), 0)) AS adjustedQuantity
+    FROM tb_inventory
+    LEFT JOIN tb_transaction ON tb_inventory.inventoryId = tb_transaction.transactionItem
+    WHERE {{target}} LIKE ? OR {{target}} LIKE ? OR {{target}} LIKE ?
+    GROUP BY tb_inventory.inventoryId
+`;
                     if (req.query.searchTarget == "brand") {
                         sql = sql.replaceAll("{{target}}", "inventoryBrand");
                     } else if (req.query.searchTarget == "type") {
@@ -411,13 +453,15 @@ router.get('/inventoryList', async function (req, res) {
                                 theData.items[theData.items.length-1].details[0] = {};
                                 theData.items[theData.items.length-1].details[0].type = results[k].inventoryType;
                                 theData.items[theData.items.length-1].details[0].price = results[k].inventoryPrice;
-                                theData.items[theData.items.length-1].details[0].quantity = results[k].inventoryQuantity;
+                                theData.items[theData.items.length-1].details[0].quantity = results[k].adjustedQuantity;
+                                theData.items[theData.items.length-1].details[0].SId = results[k].inventorySId;
                                 theData.items[theData.items.length-1].details[0].supplierName = results[k].inventorySupplierName;
                             }else{
                                 var l = {};
                                 l.type = results[k].inventoryType;
                                 l.price = results[k].inventoryPrice;
-                                l.quantity = results[k].inventoryQuantity;
+                                l.quantity = results[k].adjustedQuantity;
+                                l.SId = results[k].inventorySId;
                                 l.supplierName = results[k].inventorySupplierName;
                                 theData.items[brandExist].details.push(l);
                             }
@@ -430,7 +474,19 @@ router.get('/inventoryList', async function (req, res) {
                     }
                 } else {
                     var [results, fields] = await db.query(
-                        "SELECT * FROM tb_inventory"
+                        `
+    SELECT 
+        tb_inventory.inventoryId,
+        tb_inventory.inventoryBrand,
+        tb_inventory.inventoryType,
+        tb_inventory.inventoryPrice,
+        tb_inventory.inventorySupplierName,
+        tb_inventory.inventorySId,
+        (tb_inventory.inventoryQuantity - IFNULL(SUM(tb_transaction.transactionQuantity), 0)) AS adjustedQuantity
+    FROM tb_inventory
+    LEFT JOIN tb_transaction ON tb_inventory.inventoryId = tb_transaction.transactionItem
+    GROUP BY tb_inventory.inventoryId
+`
                     );
                     var theData = {
                         items: []
@@ -452,13 +508,15 @@ router.get('/inventoryList', async function (req, res) {
                             theData.items[theData.items.length-1].details[0] = {};
                             theData.items[theData.items.length-1].details[0].type = results[k].inventoryType;
                             theData.items[theData.items.length-1].details[0].price = results[k].inventoryPrice;
-                            theData.items[theData.items.length-1].details[0].quantity = results[k].inventoryQuantity;
+                            theData.items[theData.items.length-1].details[0].quantity = results[k].adjustedQuantity;
+                            theData.items[theData.items.length-1].details[0].SId = results[k].inventorySId;
                             theData.items[theData.items.length-1].details[0].supplierName = results[k].inventorySupplierName;
                         }else{
                             var l = {};
                             l.type = results[k].inventoryType;
                             l.price = results[k].inventoryPrice;
-                            l.quantity = results[k].inventoryQuantity;
+                            l.quantity = results[k].adjustedQuantity;
+                            l.SId = results[k].inventorySId;
                             l.supplierName = results[k].inventorySupplierName;
                             theData.items[brandExist].details.push(l);
                         }
@@ -559,15 +617,11 @@ router.put('/inventory', async function (req, res) {
         } else {
             var db = await connect("root", "db_aemetal");
             var details = req.body.details;
+            console.log(details);
             try {
                 await db.query(
-                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice = ?, inventoryQuantity = ? WHERE inventorySId = ? and inventoryType = ?",
-                    [details.brand, details.price202, details.quantity202, details.id, 202]
-                );
-
-                await db.query(
-                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice = ?, inventoryQuantity = ? WHERE inventorySId = ? and inventoryType = ?",
-                    [details.brand, details.price304, details.quantity304, details.id, 304]
+                    "UPDATE tb_inventory SET inventoryBrand = ?, inventoryPrice = ?, inventoryType = ?, inventoryQuantity = ?, inventorySupplierName = ? WHERE inventoryId = ? ",
+                    [details.brand, details.Price, details.Type, details.quantity, details.supply, details.id]
                 );
                 
                 db.end();
@@ -884,6 +938,7 @@ router.post('/saveOrder', async function (req, res) {
             var [results, fields] = await db.query(
                 itemSQL, [details.itemId, details.type]
             );
+            console.log("Query results:", results);
             if (results.length > 0) {
                 order.item = results[0];
                 order.itemName = details.itemName;
@@ -966,14 +1021,18 @@ router.post('/checkOut', async function(req, res){
                     var itemSQL = "insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionPaymentProof) VALUES(?,?,?,?,?,?)";
                     var truePrice = (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
                     total += (parseInt(orders[i].quantity) * parseFloat(orders[i].price)).toFixed(2);
+                    console.log("Total: " + total);
+                    var discountedPrice = (parseFloat(total) - parseFloat(details.discount)).toFixed(2);
+                    console.log("True Price with discount: " + discountedPrice);
+                    //total = (parseInt(details.discount) - total).toFixed(2);
                     if(details.deliveryFee == ""){
-                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionSalesInvoiceNumber, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?)"
-                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.salesInvoiceNumber, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0]);
+                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionSalesInvoiceNumber, transactionDiscount, transactionPaymentProof, transactionDelivery) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?,?)"
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.salesInvoiceNumber, details.discount, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0]);
                     }else{
                         total = (((parseFloat(total) * 100) + (parseFloat(parseFloat(details.deliveryFee).toFixed(2)) * 100)) / 100).toFixed(2);
                         truePrice = (((parseFloat(truePrice) * 100) + (parseFloat(parseFloat(details.deliveryFee).toFixed(2)) * 100)) / 100).toFixed(2);
-                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionSalesInvoiceNumber, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?,?)"
-                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.salesInvoiceNumber, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, 0, details.deliveryaddress]);
+                        await db.query("insert into tb_transaction(transactionItem, transactionQuantity, transactionPrice, transactionDate, transactionCustomerName, transactionSalesInvoiceNumber, transactionPaymentProof, transactionDelivery, transactionDeliveryAddress, transactionDiscount) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?,?,?,?,?)"
+                            ,[orders[i].item.inventoryId, orders[i].quantity, truePrice, details.customername, details.salesInvoiceNumber, JSON.parse(JSON.stringify(formfields))[1].file[0].newFilename, details.deliveryFee, details.deliveryaddress, details.discount]);
                     }
                         
                 }
