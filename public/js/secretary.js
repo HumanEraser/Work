@@ -102,6 +102,7 @@ function formatTable() {
 function openItem(item){
     selectedBatch = item;
     $('#addModal').modal('show');
+    document.getElementById('orderCount').value = '0';
     addItem();
 }
 
@@ -122,14 +123,24 @@ function addItem(){
             quantity304 = batchData[selectedBatch].details[i].quantity;
         }
     }
-    if(batchData[selectedBatch].details[0].type == '202'){
-        tableBody += '<tr><td>202</td><td>'+ quantity202 + '</td><td>'+ price202 +'</td><td><input type="radio" id="202id" name="fav_language" value="202"></td></tr>';
+    if(batchLength == 1){
+        if(batchData[selectedBatch].details[0].type == '202'){
+            tableBody += '<tr><td>202</td><td>'+ quantity202 + '</td><td>'+ price202 +'</td><td><input type="radio" id="202id" name="fav_language" value="202"></td></tr>';
+        }
+        if(batchData[selectedBatch].details[0].type == '304'){
+            tableBody += '<tr><td>304</td><td>'+ quantity304 + '</td><td>'+ price304 +'</td><td><input type="radio" id="304id" name="fav_language" value="304"></td></tr>';
+        }
+    }else if(batchLength == 2){
+        if(batchData[selectedBatch].details[0].type == '202'){
+            tableBody += '<tr><td>202</td><td>'+ quantity202 + '</td><td>'+ price202 +'</td><td><input type="radio" id="202id" name="fav_language" value="202"></td></tr>';
+        }
+        if(batchData[selectedBatch].details[1].type == '304'){
+            tableBody += '<tr><td>304</td><td>'+ quantity304 + '</td><td>'+ price304 +'</td><td><input type="radio" id="304id" name="fav_language" value="304"></td></tr>';
+        }
     }
-    if(batchData[selectedBatch].details[1].type == '304'){
-        tableBody += '<tr><td>304</td><td>'+ quantity304 + '</td><td>'+ price304 +'</td><td><input type="radio" id="304id" name="fav_language" value="304"></td></tr>';
-    }
+
     document.getElementById('tableBody').innerHTML = tableBody;
-    console.log(batchData[selectedBatch].name);
+    console.log(batchData[selectedBatch]);
 }
 
 function saveAdd() {
@@ -197,17 +208,33 @@ function cancelAdd() {
 }
 
 function checkStock(){
-    if(document.getElementById('202id').checked){
-        if(document.getElementById('orderCount').value > batchData[selectedBatch].details[0].quantity){
-            document.getElementById('orderCount').value = batchData[selectedBatch].details[0].quantity;
-            alert('Quantity exceeds available stock');
-            return;
+    if(batchLength > 1){
+        if(document.getElementById('202id').checked){
+            if(document.getElementById('orderCount').value > batchData[selectedBatch].details[0].quantity){
+                document.getElementById('orderCount').value = batchData[selectedBatch].details[0].quantity;
+                alert('Quantity exceeds available stock');
+                return;
+            }
+        } if(document.getElementById('304id').checked){
+            if(document.getElementById('orderCount').value > batchData[selectedBatch].details[1].quantity){
+                document.getElementById('orderCount').value = batchData[selectedBatch].details[1].quantity;
+                alert('Quantity exceeds available stock');
+                return;
+            }
         }
-    }else if(document.getElementById('304id').checked){
-        if(document.getElementById('orderCount').value > batchData[selectedBatch].details[1].quantity){
-            document.getElementById('orderCount').value = batchData[selectedBatch].details[1].quantity;
-            alert('Quantity exceeds available stock');
-            return;
+    }else{
+        if(batchData[selectedBatch].details[0].type == '202'){
+            if(document.getElementById('orderCount').value > batchData[selectedBatch].details[0].quantity){
+                document.getElementById('orderCount').value = batchData[selectedBatch].details[0].quantity;
+                alert('Quantity exceeds available stock');
+                return;
+            }
+        } if(batchData[selectedBatch].details[0].type == '304'){
+            if(document.getElementById('orderCount').value > batchData[selectedBatch].details[0].quantity){
+                document.getElementById('orderCount').value = batchData[selectedBatch].details[0].quantity;
+                alert('Quantity exceeds available stock');
+                return;
+            }
         }
     }
 }
