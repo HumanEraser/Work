@@ -109,3 +109,11 @@ element{
 .topTableText{
     font-size: 0.9rem;
 }
+
+#searchText{
+    border: 1px solid black;
+}
+
+#searchField{
+    border: 0.5px solid black;
+}

@@ -6,7 +6,29 @@
 .loginMenu{
     max-width: 100%;
     margin: auto;
-    margin-top: 15%;
+    margin-top: 10%;
+    border: 2px solid #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-left: 40%;
+    margin-right: 40%;
+    box-shadow: 5px 10px 10px rgba(175, 175, 175, 0.511);
+}
+
+.topBar{
+    background-color: rgb(20, 20, 77);
+    padding: 10px;
+    border-radius: 10px 10px 0px 0px;
+    font-size: 1rem;
+    
+}
+
+.topBar p{
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0.5%;
 }
 
 .form2 input{

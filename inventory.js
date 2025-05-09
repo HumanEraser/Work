@@ -1094,3 +1094,4 @@ router.post('/logout', async function (req, res) {
 export function inventory() {
     return router;
 };
+

@@ -265,7 +265,7 @@ function formatTable() {
             }
             for (var i = 0; i < batchData[index].details.length; i++) {
                 if(prioBatch){
-                    if(parseInt(batchData[index].details[i].quantity) <= 100){
+                    if(parseInt(batchData[index].details[i].quantity) <= 5){
                     bodyHtml = bodyHtml.concat('<tr> <td class="text-center">').concat(item.name).concat('</td>');
 
                     /*if(batchData[index].details[i].type == '202'){
